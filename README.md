@@ -1,2 +1,2 @@
 # Seen it? 
-# App fot tracking series and movies
+App for tracking series and movies
