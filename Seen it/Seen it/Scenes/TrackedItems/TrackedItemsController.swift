@@ -22,6 +22,19 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
         view.backgroundColor = UIColor(named: "background")
         
         setup()
+        loadData()
+    }
+    
+    func loadData() {
+        self.trackedItems = generateData()
+        self.tableView.reloadData()
+    }
+    
+    func generateData() -> [TrackedItem] {
+        return [
+            TrackedItem(itemName: "Изгой", itemYear: "2006", itemDuration: "1:34", itemImage: ""),
+            TrackedItem(itemName: "Один дома 1", itemYear: "1999", itemDuration: "1:44", itemImage: "")
+        ]
     }
     
     private func setup() {
@@ -50,5 +63,9 @@ extension TrackedItemsController {
         cell.configure(with: trackedItems[indexPath.row])
 
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 64
     }
 }
