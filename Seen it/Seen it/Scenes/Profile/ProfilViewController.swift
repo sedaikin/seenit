@@ -1,5 +1,5 @@
 //
-//  SearchViewController.swift
+//  ProfilViewController.swift
 //  Seen it
 //
 //  Created by Sedaykin Aleksey on 19.08.2025.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class SearchViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     
     // MARK: - Private properties
     
@@ -21,6 +21,6 @@ final class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "background")
+        view.backgroundColor = .systemBackground
     }
 }
