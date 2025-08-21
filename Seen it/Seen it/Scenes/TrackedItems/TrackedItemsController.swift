@@ -12,6 +12,9 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     // MARK: - Private properties
     
     private let tableView = UITableView()
+    private let refreshControl = UIRefreshControl()
+    private let navigationBar = UINavigationBar()
+    
     private var trackedItems: [TrackedItem] = []
     
     // MARK: - Life cycle
@@ -19,11 +22,10 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "background")
-        
         setup()
         loadData()
     }
+ 
     
     func loadData() {
         self.trackedItems = generateData()
@@ -38,12 +40,33 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     }
     
     private func setup() {
-        title = "Мой список"
-        
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.register(TrackedItemTableViewCell.self, forCellReuseIdentifier: TrackedItemTableViewCell.reuseID)
+        tableView.refreshControl = refreshControl
+        tableView.frame = view.bounds
+        tableView.backgroundColor = UIColor(named: "background")
+        tableView.contentInset.top = 45
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "Мой список"
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        titleLabel.textColor = .white
 
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = "2 фильма"
+        subtitleLabel.font = UIFont.systemFont(ofSize: 12)
+        subtitleLabel.textColor = .systemGray3
+
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        stackView.axis = .vertical
+        stackView.alignment = .center
+
+        navigationItem.titleView = stackView
+        navigationController?.additionalSafeAreaInsets.top = 5
+        
         view.addSubview(tableView)
+        view.addSubview(navigationBar)
         self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
     }
 }

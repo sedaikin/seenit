@@ -37,6 +37,7 @@ final class MainTabBarController: UITabBarController {
         let trackedItemsViewController = setupTrackedItemsViewController()
         
         viewControllers = [homeViewController, searchViewController, trackedItemsViewController]
+        self.selectedViewController = viewControllers?[2]
     }
 }
 

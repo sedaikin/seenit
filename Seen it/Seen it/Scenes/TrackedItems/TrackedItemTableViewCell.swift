@@ -49,13 +49,17 @@ final class TrackedItemTableViewCell: UITableViewCell {
     }
     
     private func setup() {
-        itemName.font = .systemFont(ofSize: 19, weight: .medium)
-        itemYear.font = .systemFont(ofSize: 15, weight: .regular)
+        itemName.font = .systemFont(ofSize: 16, weight: .bold)
+        itemName.textColor = .white
+        itemYear.font = .systemFont(ofSize: 12, weight: .light)
+        itemYear.textColor = .white
         itemDuration.font = .systemFont(ofSize: 15, weight: .regular)
 
         contentView.addSubview(itemName)
         contentView.addSubview(itemYear)
         contentView.addSubview(itemDuration)
+        contentView.sepa
+        self.backgroundColor = UIColor(named: "background")
     }
     
     func configure(with trackedItem: TrackedItem) {
@@ -66,7 +70,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
         itemDuration.text = trackedItem.itemDuration
         itemImage.image = UIImage(systemName: "person.circle")
 
-        buttonTracked.setImage(UIImage(systemName: trackedItem.isTracked ? "bookmark.fill" : "bookmark"), for: .normal)
+        buttonTracked.setImage(UIImage(systemName: trackedItem.isTracked ? "eye.fill" : "eye"), for: .normal)
         accessoryView = buttonTracked
     }
 }
