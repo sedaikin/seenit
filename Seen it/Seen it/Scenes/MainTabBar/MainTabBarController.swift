@@ -33,8 +33,8 @@ final class MainTabBarController: UITabBarController {
     
     private func setupTabBar() {
         let homeViewController = setupHomeViewController()
+        let profileViewController = setupProfileViewController()
         let searchViewController = setupSearchViewController()
-        let trackedItemsViewController = setupTrackedItemsViewController()
         
         viewControllers = [homeViewController, searchViewController, trackedItemsViewController]
         self.selectedViewController = viewControllers?[2]
@@ -48,28 +48,31 @@ private extension MainTabBarController {
         let viewController = HomeViewController()
         
         let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
         
         navigationController.tabBarItem.image = UIImage(systemName: "safari")
         
         return navigationController
     }
     
-    func setupSearchViewController() -> UIViewController {
-        let viewController = SearchViewController()
+    func setupProfileViewController() -> UIViewController {
+        let viewController = ProfileViewController()
         
         let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
         
-        navigationController.tabBarItem.image = UIImage(systemName: "magnifyingglass")
+        navigationController.tabBarItem.image = UIImage(systemName: "checklist")
         
         return navigationController
     }
     
-    func setupTrackedItemsViewController() -> UIViewController {
-        let viewController = TrackedItemsController()
+    func setupSearchViewController() -> UIViewController {
+        let viewController = ProfileViewController()
         
         let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
         
-        navigationController.tabBarItem.image = UIImage(systemName: "checklist")
+        navigationController.tabBarItem.image = UIImage(systemName: "magnifyingglass")
         
         return navigationController
     }
