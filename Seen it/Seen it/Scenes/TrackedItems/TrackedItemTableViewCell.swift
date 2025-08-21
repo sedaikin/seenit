@@ -58,7 +58,6 @@ final class TrackedItemTableViewCell: UITableViewCell {
         contentView.addSubview(itemName)
         contentView.addSubview(itemYear)
         contentView.addSubview(itemDuration)
-        contentView.sepa
         self.backgroundColor = UIColor(named: "background")
     }
     
