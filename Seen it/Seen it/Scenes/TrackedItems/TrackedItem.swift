@@ -5,7 +5,7 @@
 //  Created by Sedaykin Aleksey on 19.08.2025.
 //
 
-struct TrackedItem:Decodable {
+struct TrackedItem: Decodable {
     let items: [FilmItem]
 }
 

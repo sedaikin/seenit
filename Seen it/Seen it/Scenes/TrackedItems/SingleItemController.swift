@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SingleItemController: UIViewController {
+final class SingleItemController: UIViewController {
     
     let singleItem: FilmItem
 
