@@ -1,0 +1,15 @@
+/* 
+  Localizable.strings
+  Seen it
+
+  Created by Sedaykin Aleksey on 25.08.2025.
+  
+*/
+
+"markAsWatched" = "Отметить как просмотренный?";
+"markAsNotWatched" = "Отметить как непросмотренный?";
+"movieIsWatched" = "Фильм будет считаться просмотренным";
+"movieIsNotWatched" = "Фильм будет считаться непросмотренным";
+"mark" = "Отметить";
+"cancel" = "Отмена";
+"myList" = "Мой список";

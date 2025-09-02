@@ -27,6 +27,8 @@ final class MainTabBarController: UITabBarController {
         appearance.stackedLayoutAppearance.selected.iconColor = UIColor(named: "active")
         appearance.stackedLayoutAppearance.normal.iconColor = .systemGray3
         
+        UITabBarItem.appearance().titlePositionAdjustment = UIOffset(horizontal: 0, vertical: -10)
+        
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
     }

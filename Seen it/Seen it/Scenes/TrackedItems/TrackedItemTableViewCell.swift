@@ -7,16 +7,20 @@
 
 import UIKit
 
+protocol TrackedItemDelegate: AnyObject {
+    func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath)
+}
+
 final class TrackedItemTableViewCell: UITableViewCell {
     static let reuseID = "TrackedItemTableViewCell"
     
-    private let itemName = UILabel()
-    private let itemYear = UILabel()
-    private let itemDuration = UILabel()
-    private let itemImage = UIImageView()
+    private let name = UILabel()
+    private let year = UILabel()
+    private let duration = UILabel()
+    private let image = RemoteImageView()
     private let buttonTracked = UIButton(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
     
-    private var trackedItem: TrackedItem?
+    var trackedItem: FilmItem?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -28,71 +32,129 @@ final class TrackedItemTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        let labelWidth = contentView.bounds.width - Constants.horizontal - Constants.Avatar.size.width - Constants.Name.left - Constants.horizontal
-        
-        itemName.frame = CGRect(
-            x: Constants.horizontal + Constants.Avatar.size.width + Constants.Name.left,
-            y: Constants.Name.top,
-            width: labelWidth,
-            height: Constants.Name.height
-        )
-
-        itemYear.frame = CGRect(
-            x: Constants.horizontal + Constants.Avatar.size.width + Constants.Name.left,
-            y: Constants.Name.top + Constants.Name.height + Constants.Phone.top,
-            width: labelWidth,
-            height: Constants.Phone.height
-        )
-    }
+    // MARK: - Setup views
     
     private func setup() {
-        itemName.font = .systemFont(ofSize: 16, weight: .bold)
-        itemName.textColor = .white
-        itemYear.font = .systemFont(ofSize: 12, weight: .light)
-        itemYear.textColor = .white
-        itemDuration.font = .systemFont(ofSize: 15, weight: .regular)
-
-        contentView.addSubview(itemName)
-        contentView.addSubview(itemYear)
-        contentView.addSubview(itemDuration)
-        self.backgroundColor = UIColor(named: "background")
+        contentView.addSubview(name)
+        contentView.addSubview(year)
+        contentView.addSubview(duration)
+        contentView.addSubview(image)
+        contentView.addSubview(buttonTracked)
+        
+        self.backgroundColor = .background
+        
+        setupItemImage()
+        setupItemName()
+        setupItemYear()
+        setupTrackedButton()
+        setupItemDuration()
     }
     
-    func configure(with trackedItem: TrackedItem) {
-        self.trackedItem = trackedItem
-
-        itemName.text = trackedItem.itemName
-        itemYear.text = trackedItem.itemYear
-        itemDuration.text = trackedItem.itemDuration
-        itemImage.image = UIImage(systemName: "person.circle")
-
-        buttonTracked.setImage(UIImage(systemName: trackedItem.isTracked ? "eye.fill" : "eye"), for: .normal)
-        accessoryView = buttonTracked
+    private func setupItemImage() {
+        image.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            image.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            image.widthAnchor.constraint(equalToConstant: 60),
+            image.heightAnchor.constraint(equalToConstant: 90),
+        ])
     }
-}
-
-private extension TrackedItemTableViewCell {
-    struct Constants {
-        struct Avatar {
-            static let size = CGSize(width: 40, height: 40)
-            static let vertical: CGFloat = 12
+    
+    private func setupItemName() {
+        name.font = .systemFont(ofSize: 16, weight: .bold)
+        name.textColor = .white
+        name.numberOfLines = 0
+        name.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            name.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
+            name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
+            name.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0)
+        ])
+    }
+    
+    private func setupItemYear() {
+        year.font = .systemFont(ofSize: 12, weight: .light)
+        year.textColor = .systemGray4
+        
+        year.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
+            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
+            year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34)
+        ])
+    }
+    
+    private func setupItemDuration() {
+        duration.font = .systemFont(ofSize: 12, weight: .light)
+        duration.textColor = .systemGray4
+        
+        duration.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
+            duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
+            duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
+        ])
+    }
+    
+    private func setupTrackedButton() {
+        buttonTracked.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            buttonTracked.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0),
+            buttonTracked.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            buttonTracked.widthAnchor.constraint(equalToConstant: 40),
+        ])
+        buttonTracked.addTarget(self, action: #selector(didTapTrackedButton), for: .touchUpInside)
+    }
+    
+    // MARK: - Prepare for reuse
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        image.image = nil
+    }
+    
+    // MARK: - Public
+    
+    func configure(with trackedItem: FilmItem) {
+        self.trackedItem = trackedItem
+        
+        if let allDuration = trackedItem.duration {
+            let hours = String(allDuration/60)
+            let minutes = String(allDuration%60)
+            
+            duration.text = " \u{2022} " + (hours != "0" ? hours + " ч " : "") + minutes + " мин"
         }
-
-        struct Name {
-            static let top: CGFloat = 8
-            static let left: CGFloat = 8
-            static let height: CGFloat = 24
+        
+        let isTracked = IsTracked().isTracked
+        
+        guard let url = URL(string: trackedItem.image) else {
+            return
         }
+   
+        name.text = trackedItem.name
+        year.text = String(trackedItem.year)
+        image.setImage(url: url)
+        buttonTracked.setImage(UIImage(systemName: isTracked ? "eye.fill" : "eye"), for: .normal)
+        buttonTracked.tintColor = isTracked ? .active : .white
+        
+        setNeedsLayout()
+    }
+    
+    // MARK: - Actions
+    
+    weak var delegate: TrackedItemDelegate?
+    var indexPath: IndexPath?
 
-        struct Phone {
-            static let top: CGFloat = 1
-            static let left: CGFloat = 8
-            static let height: CGFloat = 20
+    @objc
+    func didTapTrackedButton(_ sender: UIButton) {
+        if let indexPath = indexPath {
+            delegate?.didTapButtonInCell(self, at: indexPath)
         }
-
-        static let horizontal: CGFloat = 16
     }
 }
