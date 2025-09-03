@@ -25,11 +25,8 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NetworkManager.shared.loadData() { [weak self] result in
-            guard let self else {
-                return
-            }
-            
+        NetworkManager.shared.loadData() { result in
+           
             switch result {
             case .success(let item):
                 DispatchQueue.main.async {
