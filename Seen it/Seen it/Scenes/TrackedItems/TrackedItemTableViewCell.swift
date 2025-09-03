@@ -22,6 +22,9 @@ final class TrackedItemTableViewCell: UITableViewCell {
     
     var trackedItem: FilmItem?
     
+    weak var delegate: TrackedItemDelegate?
+    var indexPath: IndexPath?
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
@@ -30,86 +33,6 @@ final class TrackedItemTableViewCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: - Setup views
-    
-    private func setup() {
-        contentView.addSubview(name)
-        contentView.addSubview(year)
-        contentView.addSubview(duration)
-        contentView.addSubview(image)
-        contentView.addSubview(buttonTracked)
-        
-        self.backgroundColor = .background
-        
-        setupItemImage()
-        setupItemName()
-        setupItemYear()
-        setupTrackedButton()
-        setupItemDuration()
-    }
-    
-    private func setupItemImage() {
-        image.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            image.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            image.widthAnchor.constraint(equalToConstant: 60),
-            image.heightAnchor.constraint(equalToConstant: 90),
-        ])
-    }
-    
-    private func setupItemName() {
-        name.font = .systemFont(ofSize: 16, weight: .bold)
-        name.textColor = .white
-        name.numberOfLines = 0
-        name.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            name.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
-            name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
-            name.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0)
-        ])
-    }
-    
-    private func setupItemYear() {
-        year.font = .systemFont(ofSize: 12, weight: .light)
-        year.textColor = .systemGray4
-        
-        year.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
-            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
-            year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
-            year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34)
-        ])
-    }
-    
-    private func setupItemDuration() {
-        duration.font = .systemFont(ofSize: 12, weight: .light)
-        duration.textColor = .systemGray4
-        
-        duration.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
-            duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
-            duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
-        ])
-    }
-    
-    private func setupTrackedButton() {
-        buttonTracked.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            buttonTracked.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0),
-            buttonTracked.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            buttonTracked.widthAnchor.constraint(equalToConstant: 40),
-        ])
-        buttonTracked.addTarget(self, action: #selector(didTapTrackedButton), for: .touchUpInside)
     }
     
     // MARK: - Prepare for reuse
@@ -145,11 +68,93 @@ final class TrackedItemTableViewCell: UITableViewCell {
         
         setNeedsLayout()
     }
+}
+
+private extension TrackedItemTableViewCell {
     
+    // MARK: - Setup views
+    
+    func setup() {
+        contentView.addSubview(name)
+        contentView.addSubview(year)
+        contentView.addSubview(duration)
+        contentView.addSubview(image)
+        contentView.addSubview(buttonTracked)
+        
+        backgroundColor = .background
+        
+        setupItemImage()
+        setupItemName()
+        setupItemYear()
+        setupTrackedButton()
+        setupItemDuration()
+    }
+    
+    func setupItemImage() {
+        image.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            image.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            image.widthAnchor.constraint(equalToConstant: 60),
+            image.heightAnchor.constraint(equalToConstant: 90),
+        ])
+    }
+    
+    func setupItemName() {
+        name.font = .systemFont(ofSize: 16, weight: .bold)
+        name.textColor = .white
+        name.numberOfLines = 0
+        name.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            name.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
+            name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
+            name.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0)
+        ])
+    }
+    
+    func setupItemYear() {
+        year.font = .systemFont(ofSize: 12, weight: .light)
+        year.textColor = .systemGray4
+        
+        year.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
+            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
+            year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34)
+        ])
+    }
+    
+    func setupItemDuration() {
+        duration.font = .systemFont(ofSize: 12, weight: .light)
+        duration.textColor = .systemGray4
+        
+        duration.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
+            duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
+            duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
+        ])
+    }
+    
+    func setupTrackedButton() {
+        buttonTracked.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            buttonTracked.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0),
+            buttonTracked.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            buttonTracked.widthAnchor.constraint(equalToConstant: 40),
+        ])
+        buttonTracked.addTarget(self, action: #selector(didTapTrackedButton), for: .touchUpInside)
+    }
+}
+
+private extension TrackedItemTableViewCell {
     // MARK: - Actions
-    
-    weak var delegate: TrackedItemDelegate?
-    var indexPath: IndexPath?
 
     @objc
     func didTapTrackedButton(_ sender: UIButton) {

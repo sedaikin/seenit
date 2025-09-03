@@ -25,37 +25,9 @@ struct FilmItem: Decodable {
     }
 }
 
+// Временное место, потом поправлю когда буду знать как хранить данные на девайсе
+
 struct IsTracked {
     let isTracked: Bool = false
 }
 
-//{
-//  "total": 60,
-//  "items": [
-//    {
-//      "kinopoiskId": 5047471,
-//      "nameRu": "Волшебник Изумрудного города. Дорога из жёлтого кирпича",
-//      "nameEn": "",
-//      "year": 2024,
-//      "posterUrl": "https://kinopoiskapiunofficial.tech/images/posters/kp/5047471.jpg",
-//      "posterUrlPreview": "https://kinopoiskapiunofficial.tech/images/posters/kp_small/5047471.jpg",
-//      "countries": [
-//        {
-//          "country": "Россия"
-//        }
-//      ],
-//      "genres": [
-//        {
-//          "genre": "фэнтези"
-//        },
-//        {
-//          "genre": "приключения"
-//        },
-//        {
-//          "genre": "семейный"
-//        }
-//      ],
-//      "duration": 104,
-//      "premiereRu": "2025-01-01"
-//    },
-//    ]

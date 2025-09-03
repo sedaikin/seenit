@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackedItemsController: UIViewController, UITableViewDelegate, UITableViewDataSource, TrackedItemDelegate {
+final class TrackedItemsController: UIViewController {
 
     // MARK: - Private properties
     
@@ -26,7 +26,7 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
         super.viewDidLoad()
         
         NetworkManager.shared.loadData() { result in
-           
+    
             switch result {
             case .success(let item):
                 DispatchQueue.main.async {
@@ -94,6 +94,7 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     
     func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath) {
         
+// TODO: Расскоментировать когда будет ясен принцип работы с кнопкой
 //        guard var cell = cell.trackedItem else {
 //            return
 //        }
@@ -116,10 +117,28 @@ final class TrackedItemsController: UIViewController, UITableViewDelegate, UITab
     }
 }
 
+// MARK: - UITableViewDelegate
+
+extension TrackedItemsController: UITableViewDelegate {
+    
+}
+
+// MARK: - UITableViewDataSource
+
+extension TrackedItemsController: UITableViewDataSource {
+    
+}
+
+// MARK: - TrackedItemDelegate
+
+extension TrackedItemsController: TrackedItemDelegate {
+    
+}
+
 extension TrackedItemsController {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return trackedItems.count
+        trackedItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
