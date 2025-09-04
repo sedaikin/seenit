@@ -154,6 +154,7 @@ private extension TrackedItemTableViewCell {
 }
 
 private extension TrackedItemTableViewCell {
+    
     // MARK: - Actions
 
     @objc

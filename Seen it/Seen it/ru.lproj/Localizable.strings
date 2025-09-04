@@ -16,3 +16,6 @@
 "hours" = "ч";
 "mins" = "мин";
 "description" = "Описание";
+"rating" = "Рейтинг";
+"noRating" = "Оценок пока нет";
+"genres" = "Жанры";
