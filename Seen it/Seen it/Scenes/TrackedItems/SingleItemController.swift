@@ -41,10 +41,29 @@ final class SingleItemController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTransparentNavBar()
         
-        NetworkManager.shared.loadSingleData(id: singleItem.id) { result in
-           
+        setupTransparentNavBar()
+        addSubViews()
+        loadData()
+        setupUI()
+        setupCustomBackButton()
+        
+        view.backgroundColor = .background
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        restoreDefaultNavBar()
+    }
+}
+
+// MARK: - Private
+
+private extension SingleItemController {
+    
+    func loadData() {
+            NetworkManager.shared.loadSingleData(id: singleItem.id) { result in
+            
             switch result {
             case .success(let item):
                 DispatchQueue.main.async {
@@ -55,25 +74,15 @@ final class SingleItemController: UIViewController {
                 print(error)
             }
         }
-
-        view.backgroundColor = .background
-  
-        view.addSubviews(poster, name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
-        
-        setupUI()
-        setupLayout()
-        setupCustomBackButton()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        restoreDefaultNavBar()
+    // MARK: - Add subViews
+    
+    func addSubViews() {
+        view.addSubviews(poster, name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
     }
-}
-
-// MARK: - Private setup
-
-private extension SingleItemController {
+    
+    // MARK: - Setup views
     
     func setupTransparentNavBar() {
         let appearance = UINavigationBarAppearance()
@@ -105,45 +114,48 @@ private extension SingleItemController {
     }
 
     func setupUI () {
+        setupPoster()
+        setupName()
+        setupButtonTracked()
+        setupButtonAdded()
+        setupYear()
+        setupDuration()
+        setupGenresTitle()
+        setupGenres()
+        setupTitleDescription()
+        setupTextDescription()
+        setupRatingsTitle()
+        setupRatingKp()
+        setupRatingIMDB()
+    }
+    
+    func setupPoster() {
         poster.contentMode = .scaleAspectFill
         poster.clipsToBounds = true
         
+        poster.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            poster.topAnchor.constraint(equalTo:view.topAnchor, constant: 0),
+            poster.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+            poster.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
+            poster.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.75)
+        ])
+    }
+    
+    func setupName() {
         name.font = .boldSystemFont(ofSize: 24)
         name.textColor = .white
         name.numberOfLines = 0
         
-        year.font = .boldSystemFont(ofSize: 16)
-        year.textColor = .systemGray2
-        
-        duration.font = .boldSystemFont(ofSize: 16)
-        duration.textColor = .systemGray2
-        
-        genresTitle.text = String(localized: "genres")
-        genresTitle.font = .boldSystemFont(ofSize: 14)
-        genresTitle.textColor = .white
-        
-        genres.font = .systemFont(ofSize: 12)
-        genres.textColor = .systemGray3
-        genres.numberOfLines = 0
-        
-        titleDescription.text = String(localized: "description")
-        titleDescription.font = .boldSystemFont(ofSize: 14)
-        titleDescription.textColor = .white
-        
-        textDescription.font = .systemFont(ofSize: 12)
-        textDescription.textColor = .systemGray3
-        textDescription.numberOfLines = 0
-        
-        ratingsTitle.text = String(localized: "rating")
-        ratingsTitle.textColor = .white
-        ratingsTitle.font = .boldSystemFont(ofSize: 14)
-        
-        ratingKp.font = .systemFont(ofSize: 12)
-        ratingKp.textColor = .systemGray3
-        
-        ratingImdb.font = .systemFont(ofSize: 12)
-        ratingImdb.textColor = .systemGray3
-        
+        name.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            name.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
+            name.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0)
+        ])
+    }
+    
+    func setupButtonTracked() {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: "eye")
         config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 8)
@@ -154,29 +166,6 @@ private extension SingleItemController {
         buttonTracked.contentVerticalAlignment = .fill
         buttonTracked.imageView?.contentMode = .scaleAspectFit
         
-        buttonAdded.tintColor = .active
-        buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal)
-        buttonAdded.contentHorizontalAlignment = .fill
-        buttonAdded.contentVerticalAlignment = .fill
-        buttonAdded.imageView?.contentMode = .scaleAspectFit
-    }
-    
-    func setupLayout() {
-        poster.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            poster.topAnchor.constraint(equalTo:view.topAnchor, constant: 0),
-            poster.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
-            poster.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            poster.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.75)
-        ])
-        
-        name.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            name.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
-            name.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0)
-        ])
-        
         buttonTracked.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             buttonTracked.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
@@ -185,6 +174,14 @@ private extension SingleItemController {
             buttonTracked.widthAnchor.constraint(equalToConstant: 42),
             buttonTracked.heightAnchor.constraint(equalToConstant: 32)
         ])
+    }
+    
+    func setupButtonAdded() {
+        buttonAdded.tintColor = .active
+        buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal)
+        buttonAdded.contentHorizontalAlignment = .fill
+        buttonAdded.contentVerticalAlignment = .fill
+        buttonAdded.imageView?.contentMode = .scaleAspectFit
         
         buttonAdded.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -194,6 +191,11 @@ private extension SingleItemController {
             buttonAdded.widthAnchor.constraint(equalToConstant: 26),
             buttonAdded.heightAnchor.constraint(equalToConstant: 32)
         ])
+    }
+    
+    func setupYear() {
+        year.font = .boldSystemFont(ofSize: 16)
+        year.textColor = .systemGray2
         
         year.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -201,6 +203,11 @@ private extension SingleItemController {
             year.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0)
         ])
+    }
+    
+    func setupDuration() {
+        duration.font = .boldSystemFont(ofSize: 16)
+        duration.textColor = .systemGray2
         
         duration.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -208,6 +215,12 @@ private extension SingleItemController {
             duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
             duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0)
         ])
+    }
+    
+    func setupGenresTitle() {
+        genresTitle.text = String(localized: "genres")
+        genresTitle.font = .boldSystemFont(ofSize: 14)
+        genresTitle.textColor = .white
         
         genresTitle.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -215,6 +228,12 @@ private extension SingleItemController {
             genresTitle.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             genresTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
         ])
+    }
+    
+    func setupGenres() {
+        genres.font = .systemFont(ofSize: 12)
+        genres.textColor = .systemGray3
+        genres.numberOfLines = 0
         
         genres.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -222,6 +241,12 @@ private extension SingleItemController {
             genres.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             genres.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
+    }
+    
+    func setupTitleDescription() {
+        titleDescription.text = String(localized: "description")
+        titleDescription.font = .boldSystemFont(ofSize: 14)
+        titleDescription.textColor = .white
         
         titleDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -229,6 +254,12 @@ private extension SingleItemController {
             titleDescription.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             titleDescription.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
         ])
+    }
+    
+    func setupTextDescription() {
+        textDescription.font = .systemFont(ofSize: 12)
+        textDescription.textColor = .systemGray3
+        textDescription.numberOfLines = 0
         
         textDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -236,6 +267,12 @@ private extension SingleItemController {
             textDescription.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             textDescription.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
+    }
+    
+    func setupRatingsTitle() {
+        ratingsTitle.text = String(localized: "rating")
+        ratingsTitle.textColor = .white
+        ratingsTitle.font = .boldSystemFont(ofSize: 14)
         
         ratingsTitle.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -243,6 +280,11 @@ private extension SingleItemController {
             ratingsTitle.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             ratingsTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
+    }
+    
+    func setupRatingKp() {
+        ratingKp.font = .systemFont(ofSize: 12)
+        ratingKp.textColor = .systemGray3
         
         ratingKp.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -250,6 +292,11 @@ private extension SingleItemController {
             ratingKp.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             ratingKp.trailingAnchor.constraint(equalTo: ratingImdb.leadingAnchor, constant: 0),
         ])
+    }
+    
+    func setupRatingIMDB() {
+        ratingImdb.font = .systemFont(ofSize: 12)
+        ratingImdb.textColor = .systemGray3
         
         ratingImdb.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -283,8 +330,10 @@ private extension SingleItemController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
     }
     
+    // MARK: - Update UI
+    
     func updateUI() {
-        guard let item = item, let url = URL(string: item.image) else {
+        guard let item, let url = URL(string: item.image) else {
             return
         }
         

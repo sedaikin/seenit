@@ -45,15 +45,15 @@ xcuserdata/
 
 ### Xcode Patch ###
 *.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-!*.xcworkspace/contents.xcworkspacedata
+*.xcodeproj/project.pbxproj
+*.xcodeproj/xcshareddata/
+*.xcodeproj/project.xcworkspace/
+*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,xcode
 Seen it/Seen it.xcodeproj/project.xcworkspace/xcuserdata
+Seen it/Seen it.xcodeproj/project.xcworkspace/contents.xcworkspacedata
 .DS_Store
-Seen it/Seen it.xcodeproj
 *.xcuserstate
