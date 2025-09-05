@@ -45,4 +45,36 @@ final class NetworkManager {
         
         dataTask.resume()
     }
+    
+    func loadSingleData(id: Int, completion: @escaping (Result<SingleTrackedItem, Error>) -> Void) {
+        guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/\(id)") else {
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(Self.apiKey, forHTTPHeaderField: "X-API-KEY")
+
+        let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error {
+                print(error)
+                return
+            }
+            
+            guard let data else {
+                print("no data")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                let trackedItem = try decoder.decode(SingleTrackedItem.self, from: data)
+                completion(.success(trackedItem))
+            } catch {
+                print(error)
+            }
+        }
+        
+        dataTask.resume()
+    }
 }

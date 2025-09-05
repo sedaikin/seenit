@@ -51,7 +51,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
             let hours = String(allDuration/60)
             let minutes = String(allDuration%60)
             
-            duration.text = " \u{2022} " + (hours != "0" ? hours + " ч " : "") + minutes + " мин"
+            duration.text = " \u{2022} " + (hours != "0" ? hours + " \(String(localized: "hours")) " : "") + minutes + " \(String(localized: "mins"))"
         }
         
         let isTracked = IsTracked().isTracked
@@ -154,6 +154,7 @@ private extension TrackedItemTableViewCell {
 }
 
 private extension TrackedItemTableViewCell {
+    
     // MARK: - Actions
 
     @objc

@@ -10,12 +10,14 @@ struct TrackedItem: Decodable {
 }
 
 struct FilmItem: Decodable {
+    let id: Int
     let name: String
     let year: Int
     let duration: Int?
     let image: String
     
     private enum CodingKeys: String, CodingKey {
+        case id = "kinopoiskId"
         case name = "nameRu"
         case year = "year"
         case duration = "duration"
