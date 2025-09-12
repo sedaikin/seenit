@@ -24,6 +24,8 @@ final class SingleItemController: UIViewController {
     private let genres = UILabel()
     private let buttonTracked = UIButton()
     private let buttonAdded = UIButton()
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     var item: SingleTrackedItem?
     
     let singleItem: FilmItem
@@ -79,7 +81,9 @@ private extension SingleItemController {
     // MARK: - Add subViews
     
     func addSubViews() {
-        view.addSubviews(poster, name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
+        view.addSubviews(scrollView,poster)
+        scrollView.addSubview(contentView)
+        contentView.addSubviews(name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
     }
     
     // MARK: - Setup views
@@ -112,8 +116,27 @@ private extension SingleItemController {
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
+    
+    func setupScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: poster.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor) // Важно!
+        ])
+    }
 
     func setupUI () {
+        setupScrollView()
         setupPoster()
         setupName()
         setupButtonTracked()
