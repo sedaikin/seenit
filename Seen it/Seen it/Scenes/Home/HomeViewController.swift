@@ -11,8 +11,8 @@ final class HomeViewController: UIViewController {
     
     // MARK: - Properties
     
-    private var filmsCollectionView: UICollectionView!
-    private var showsCollectionView: UICollectionView!
+    private lazy var filmsCollectionView = UICollectionView()
+    private lazy var showsCollectionView = UICollectionView()
     private let topFilmsLabel = UILabel()
     private let topShowsLabel = UILabel()
     private var films: [FilmItem] = []
@@ -23,32 +23,6 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NetworkManager.shared.loadCollection(type: filmsCollection.topMovies.type, page: 1) { result in
-    
-            switch result {
-            case .success(let item):
-                DispatchQueue.main.async {
-                    self.films.append(contentsOf: item.items)
-                    self.filmsCollectionView.reloadData()
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
-        
-        NetworkManager.shared.loadCollection(type: filmsCollection.topShows.type, page: 1) { result in
-    
-            switch result {
-            case .success(let item):
-                DispatchQueue.main.async {
-                    self.shows.append(contentsOf: item.items)
-                    self.showsCollectionView.reloadData()
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
-        
         view.backgroundColor = UIColor(named: "background")
         
         addSubviews()
@@ -57,6 +31,8 @@ final class HomeViewController: UIViewController {
         
         setupLabel()
         setupShowsLabel()
+        
+        loadData()
     }
     
 }
@@ -162,6 +138,93 @@ private extension HomeViewController {
         ])
     }
 }
+
+extension HomeViewController {
+    func loadData() {
+        
+       let loadDataQueue = DispatchQueue(label: "ru.seenit.collection")
+//       let dispatchGroup = DispatchGroup()
+//
+//       let loadFilms = DispatchWorkItem { [weak self] in
+//           NetworkManager.shared.loadCollection(type: filmsCollection.topMovies.type, page: 1) { result in
+//               guard let self else { return }
+//
+//               switch result {
+//               case .success(let item):
+//                    self.films.append(contentsOf: item.items)
+//               case .failure(let error):
+//                   print("Films error:", error)
+//               }
+//           }
+//       }
+//
+//       let loadShows = DispatchWorkItem { [weak self] in
+//           NetworkManager.shared.loadCollection(type: filmsCollection.topShows.type, page: 1) { result in
+//               guard let self else { return }
+//
+//               switch result {
+//               case .success(let item):
+//                    self.shows.append(contentsOf: item.items)
+//               case .failure(let error):
+//                   print("Shows error:", error)
+//               }
+//           }
+//       }
+//
+//       loadDataQueue.async(group: dispatchGroup, execute: loadFilms)
+//       loadDataQueue.async(group: dispatchGroup, execute: loadShows)
+//
+//       dispatchGroup.notify(queue: .main) { [weak self] in
+//           guard let self else { return }
+//           self.filmsCollectionView.reloadData()
+//           self.showsCollectionView.reloadData()
+//       }
+        
+        let dispatchGroup = DispatchGroup()
+        
+        dispatchGroup.enter()
+        loadDataQueue.async{
+            NetworkManager.shared.loadCollection(type: filmsCollection.topMovies.type, page: 1) { [weak self] result in
+                guard let self else { return }
+                defer { dispatchGroup.leave() }
+                
+                switch result {
+                case .success(let item):
+                    DispatchQueue.main.async {
+                        self.films.append(contentsOf: item.items)
+                    }
+                case .failure(let error):
+                    print("Films error:", error)
+                }
+            }
+        }
+        
+        dispatchGroup.enter()
+        loadDataQueue.async{
+            NetworkManager.shared.loadCollection(type: filmsCollection.topShows.type, page: 1) { [weak self] result in
+                guard let self else { return }
+                defer { dispatchGroup.leave() }
+                
+                switch result {
+                case .success(let item):
+                    DispatchQueue.main.async {
+                        self.shows.append(contentsOf: item.items)
+                    }
+                case .failure(let error):
+                    print("Shows error:", error)
+                }
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) { [weak self] in
+            guard let self else { return }
+            self.filmsCollectionView.reloadData()
+            self.showsCollectionView.reloadData()
+        }
+    }
+}
+
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 
 extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     

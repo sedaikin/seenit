@@ -11,7 +11,6 @@ final class HomeViewCell: UICollectionViewCell {
     
     static let reuseID = "HomeViewCell"
     
-    
     // MARK: - Properties
     
     private let name = UILabel()
