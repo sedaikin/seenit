@@ -26,14 +26,17 @@ final class SingleItemController: UIViewController {
     private let buttonAdded = UIButton()
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    private let defaults = UserDefaultsKeys()
+    private lazy var isTracked = defaults.containsMovieId(id, in: .tracked)
+    private lazy var isWatched = defaults.containsMovieId(id, in: .watched)
     var item: SingleTrackedItem?
     
-    let singleItem: FilmItem
+    let id: Int
     
     // MARK: - Life cycle
 
-    init(singleItem: FilmItem) {
-        self.singleItem = singleItem
+    init(id: Int) {
+        self.id = id
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -64,7 +67,7 @@ final class SingleItemController: UIViewController {
 private extension SingleItemController {
     
     func loadData() {
-            NetworkManager.shared.loadSingleData(id: singleItem.id) { result in
+            NetworkManager.shared.loadSingleData(id: id) { result in
             
             switch result {
             case .success(let item):
@@ -81,9 +84,7 @@ private extension SingleItemController {
     // MARK: - Add subViews
     
     func addSubViews() {
-        view.addSubviews(scrollView,poster)
-        scrollView.addSubview(contentView)
-        contentView.addSubviews(name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
+        view.addSubviews(scrollView,poster,name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
     }
     
     // MARK: - Setup views
@@ -117,26 +118,26 @@ private extension SingleItemController {
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
     
-    func setupScrollView() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: poster.bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor) // Важно!
-        ])
-    }
+//    func setupScrollView() {
+//        scrollView.translatesAutoresizingMaskIntoConstraints = false
+//        contentView.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        NSLayoutConstraint.activate([
+//            scrollView.topAnchor.constraint(equalTo: poster.bottomAnchor),
+//            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+//            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+//            
+//            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+//            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+//            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+//            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+//            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor) // Важно!
+//        ])
+//    }
 
     func setupUI () {
-        setupScrollView()
+        //setupScrollView()
         setupPoster()
         setupName()
         setupButtonTracked()
@@ -180,7 +181,7 @@ private extension SingleItemController {
     
     func setupButtonTracked() {
         var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: "eye")
+        config.image = UIImage(systemName: isWatched ? "eye.slash" : "eye")
         config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 8)
 
         buttonTracked.configuration = config
@@ -188,6 +189,7 @@ private extension SingleItemController {
         buttonTracked.contentHorizontalAlignment = .fill
         buttonTracked.contentVerticalAlignment = .fill
         buttonTracked.imageView?.contentMode = .scaleAspectFit
+        buttonTracked.addTarget(self, action: #selector(didTapTrackedButton), for: .touchUpInside)
         
         buttonTracked.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -201,10 +203,12 @@ private extension SingleItemController {
     
     func setupButtonAdded() {
         buttonAdded.tintColor = .active
-        buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal)
+        let image = isTracked ? "minus.square" : "plus.app"
+        buttonAdded.setImage(UIImage(systemName: image), for: .normal)
         buttonAdded.contentHorizontalAlignment = .fill
         buttonAdded.contentVerticalAlignment = .fill
         buttonAdded.imageView?.contentMode = .scaleAspectFit
+        buttonAdded.addTarget(self, action: #selector(didTapAddedButton), for: .touchUpInside)
         
         buttonAdded.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -398,4 +402,39 @@ private extension SingleItemController {
         navigationController?.popViewController(animated: true)
     }
     
+    @objc func didTapAddedButton() {
+        let type = item?.type == "FILM" ? "фильм" : "сериал"
+        let title = isTracked ? "Удалить \(type) из списка того, что буду смотреть?" : "Добавить \(type) в список того, что буду смотреть?"
+        showAlert(title: title)
+    }
+    
+    @objc func didTapTrackedButton() {
+        let type = item?.type == "FILM" ? "фильм" : "сериал"
+        let title = isWatched ? "Отметить \(type) как непросмотренный?" : "Отметить \(type) как просмотренный?"
+        showAlert(title: title, isAdd: false)
+    }
+}
+
+
+// MARK: - Alert
+
+private extension SingleItemController {
+    func showAlert(title: String, isAdd: Bool = true) {
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
+        let yesAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            guard let self else { return }
+            if isAdd {
+                isTracked ? defaults.removeMovieId(id, from: .tracked) : defaults.addMovieId(id, to: .tracked)
+                isTracked ? buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal) : buttonAdded.setImage(UIImage(systemName: "minus.square"), for: .normal)
+                isTracked = defaults.containsMovieId(id, in: .tracked)
+            } else {
+                isWatched ? defaults.removeMovieId(id, from: .watched) : defaults.addMovieId(id, to: .watched)
+                isWatched ? buttonTracked.setImage(UIImage(systemName: "eye"), for: .normal) : buttonTracked.setImage(UIImage(systemName: "eye.slash"), for: .normal)
+                isWatched = defaults.containsMovieId(id, in: .watched)
+            }
+        }
+        alert.addAction(yesAction)
+        alert.addAction(UIAlertAction(title: "Отмена", style: .default))
+        present(alert, animated: true)
+    }
 }

@@ -263,7 +263,7 @@ extension HomeViewController: UICollectionViewDataSource, UICollectionViewDelega
         } else {
             singleItem = shows[indexPath.row]
         }
-        let singleItemController = SingleItemController(singleItem: singleItem)
+        let singleItemController = SingleItemController(id: singleItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
     }

@@ -17,29 +17,27 @@ final class TrackedItemsController: UIViewController {
     private let titleLabel = UILabel()
     private var subtitleLabel = UILabel()
     private lazy var stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+    private let defautls = UserDefaultsKeys()
+    private lazy var filmsCount = defaults.getMovieIds(for: .watched).count
     
-    private var trackedItems: [FilmItem] = []
+    private var trackedItems: [SingleTrackedItem] = []
+    private let defaults = UserDefaultsKeys()
+    private lazy var addedItems = defaults.getMovieIds(for: .tracked)
+    
+    
     
     // MARK: - Life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        NetworkManager.shared.loadData() { result in
-    
-            switch result {
-            case .success(let item):
-                DispatchQueue.main.async {
-                    self.trackedItems.append(contentsOf: item.items)
-                    self.tableView.reloadData()
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
-        
         setupTable()
         setupNavbar()
+        //loadData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshData()
     }
     
     override func viewDidLayoutSubviews() {
@@ -62,14 +60,18 @@ final class TrackedItemsController: UIViewController {
         tableView.separatorColor = .systemGray3
         tableView.tableHeaderView = UIView()
         tableView.rowHeight = UITableView.automaticDimension
+        
+        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+        
+        
     }
     
     private func setupNavbar() {
         titleLabel.text = String(localized: "myList")
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         titleLabel.textColor = .white
-
-        subtitleLabel.text = "2 фильма"
+        
         subtitleLabel.font = UIFont.systemFont(ofSize: 12)
         subtitleLabel.textColor = .systemGray3
 
@@ -92,28 +94,13 @@ final class TrackedItemsController: UIViewController {
     
     // MARK: - Actions
     
+    @objc func refreshData(_ sender: UIRefreshControl) {
+        refreshData()
+    }
+    
     func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath) {
-        
-// TODO: Расскоментировать когда будет ясен принцип работы с кнопкой
-//        guard var cell = cell.trackedItem else {
-//            return
-//        }
-//        
-//        let alertController = UIAlertController(
-//            title: String(localized: cell.isTracked ? "markAsNotWatched" : "markAsWatched"),
-//            message: String(localized: cell.isTracked ? "movieIsNotWatched" : "movieIsWatched"),
-//            preferredStyle: .alert
-//        )
-//        
-//        let okAction = UIAlertAction(title: String(localized: "mark"), style: .default) { _ in
-//            cell.isTracked = cell.isTracked == true ? false : true
-//            self.tableView.reloadData()
-//        }
-//        let cancelAction = UIAlertAction(title: String(localized: "cancel"), style: .default, handler: nil)
-//        
-//        alertController.addAction(okAction)
-//        alertController.addAction(cancelAction)
-//        present(alertController, animated: true, completion: nil)
+        let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
+        showAlert(title: "Отметить как " + (isWatched ? "непросмотренный" : "просмотренный?"), indexPath: indexPath)
     }
 }
 
@@ -161,8 +148,53 @@ extension TrackedItemsController {
         tableView.deselectRow(at: indexPath, animated: true)
 
         let singleItem = trackedItems[indexPath.row]
-        let singleItemController = SingleItemController(singleItem: singleItem)
+        let singleItemController = SingleItemController(id: singleItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
     }
+}
+
+private extension TrackedItemsController {
+    
+    func loadData() {
+        for addedItem in addedItems {
+            NetworkManager.shared.loadSingleData(id: addedItem) { [weak self] result in
+                guard let self else { return }
+                
+                switch result {
+                case .success(let item):
+                    DispatchQueue.main.async {
+                        self.trackedItems.append(item)
+                        self.tableView.reloadData()
+                        self.filmsCount = self.trackedItems.count
+                    }
+                case .failure(let error):
+                    print(error)
+                }
+            }
+        }
+    }
+    
+    func refreshData() {
+        trackedItems = []
+        addedItems = defaults.getMovieIds(for: .tracked)
+        loadData()
+        subtitleLabel.text = "Вы хотите посмотреть \(filmsCount) фильмов/сериалов"
+        tableView.reloadData()
+        self.refreshControl.endRefreshing()
+    }
+    
+    func showAlert(title: String, isAdd: Bool = true, indexPath: IndexPath) {
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
+        let yesAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            guard let self else { return }
+            let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
+            isWatched ? defaults.removeMovieId(trackedItems[indexPath.row].id, from: .watched) : defautls.addMovieId(trackedItems[indexPath.row].id, to: .watched)
+            tableView.reloadData()
+        }
+        alert.addAction(yesAction)
+        alert.addAction(UIAlertAction(title: "Отмена", style: .default))
+        present(alert, animated: true)
+    }
+    
 }

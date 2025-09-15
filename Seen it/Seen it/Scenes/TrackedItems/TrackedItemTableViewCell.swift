@@ -20,7 +20,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
     private let image = RemoteImageView()
     private let buttonTracked = UIButton(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
     
-    var trackedItem: FilmItem?
+    var trackedItem: SingleTrackedItem?
     
     weak var delegate: TrackedItemDelegate?
     var indexPath: IndexPath?
@@ -44,7 +44,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
     
     // MARK: - Public
     
-    func configure(with trackedItem: FilmItem) {
+    func configure(with trackedItem: SingleTrackedItem) {
         self.trackedItem = trackedItem
         
         if let allDuration = trackedItem.duration {
@@ -54,8 +54,6 @@ final class TrackedItemTableViewCell: UITableViewCell {
             duration.text = " \u{2022} " + (hours != "0" ? hours + " \(String(localized: "hours")) " : "") + minutes + " \(String(localized: "mins"))"
         }
         
-        let isTracked = IsTracked().isTracked
-        
         guard let url = URL(string: trackedItem.image) else {
             return
         }
@@ -63,8 +61,9 @@ final class TrackedItemTableViewCell: UITableViewCell {
         name.text = trackedItem.name
         year.text = String(trackedItem.year)
         image.setImage(url: url)
-        buttonTracked.setImage(UIImage(systemName: isTracked ? "eye.fill" : "eye"), for: .normal)
-        buttonTracked.tintColor = isTracked ? .active : .white
+        let isWatched = UserDefaultsKeys().containsMovieId(trackedItem.id, in: .watched)
+        buttonTracked.setImage(UIImage(systemName: isWatched ? "eye.slash" : "eye"), for: .normal)
+        buttonTracked.tintColor = .active
         
         setNeedsLayout()
     }
@@ -110,19 +109,21 @@ private extension TrackedItemTableViewCell {
         NSLayoutConstraint.activate([
             name.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
             name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
-            name.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0)
+            name.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: 0),
         ])
     }
     
     func setupItemYear() {
         year.font = .systemFont(ofSize: 12, weight: .light)
         year.textColor = .systemGray4
+        year.numberOfLines = 1
+        year.sizeToFit()
         
         year.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
-            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            //year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
             year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34)
         ])
