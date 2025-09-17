@@ -181,11 +181,11 @@ private extension SingleItemController {
     
     func setupButtonTracked() {
         var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: isWatched ? "eye.slash" : "eye")
-        config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 8)
+        config.image = UIImage(systemName: isWatched ? "eye.fill" : "eye")
+        config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 8)
 
         buttonTracked.configuration = config
-        buttonTracked.tintColor = .active
+        buttonTracked.tintColor = isWatched ? .active : .systemGray3
         buttonTracked.contentHorizontalAlignment = .fill
         buttonTracked.contentVerticalAlignment = .fill
         buttonTracked.imageView?.contentMode = .scaleAspectFit
@@ -202,8 +202,8 @@ private extension SingleItemController {
     }
     
     func setupButtonAdded() {
-        buttonAdded.tintColor = .active
-        let image = isTracked ? "minus.square" : "plus.app"
+        buttonAdded.tintColor = isTracked ? .active : .systemGray3
+        let image = isTracked ? "minus.square.fill" : "plus.app"
         buttonAdded.setImage(UIImage(systemName: image), for: .normal)
         buttonAdded.contentHorizontalAlignment = .fill
         buttonAdded.contentVerticalAlignment = .fill
@@ -425,12 +425,14 @@ private extension SingleItemController {
             guard let self else { return }
             if isAdd {
                 isTracked ? defaults.removeMovieId(id, from: .tracked) : defaults.addMovieId(id, to: .tracked)
-                isTracked ? buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal) : buttonAdded.setImage(UIImage(systemName: "minus.square"), for: .normal)
+                isTracked ? buttonAdded.setImage(UIImage(systemName: "plus.app"), for: .normal) : buttonAdded.setImage(UIImage(systemName: "minus.square.fill"), for: .normal)
                 isTracked = defaults.containsMovieId(id, in: .tracked)
+                buttonAdded.tintColor = isTracked ? .active : .systemGray3
             } else {
                 isWatched ? defaults.removeMovieId(id, from: .watched) : defaults.addMovieId(id, to: .watched)
-                isWatched ? buttonTracked.setImage(UIImage(systemName: "eye"), for: .normal) : buttonTracked.setImage(UIImage(systemName: "eye.slash"), for: .normal)
+                isWatched ? buttonTracked.setImage(UIImage(systemName: "eye"), for: .normal) : buttonTracked.setImage(UIImage(systemName: "eye.fill"), for: .normal)
                 isWatched = defaults.containsMovieId(id, in: .watched)
+                buttonTracked.tintColor = isWatched ? .active : .systemGray3
             }
         }
         alert.addAction(yesAction)

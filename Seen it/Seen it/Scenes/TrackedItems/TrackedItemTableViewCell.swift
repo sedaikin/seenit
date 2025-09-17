@@ -62,8 +62,8 @@ final class TrackedItemTableViewCell: UITableViewCell {
         year.text = String(trackedItem.year)
         image.setImage(url: url)
         let isWatched = UserDefaultsKeys().containsMovieId(trackedItem.id, in: .watched)
-        buttonTracked.setImage(UIImage(systemName: isWatched ? "eye.slash" : "eye"), for: .normal)
-        buttonTracked.tintColor = .active
+        buttonTracked.setImage(UIImage(systemName: isWatched ? "eye.fill" : "eye"), for: .normal)
+        buttonTracked.tintColor = isWatched ? .active : .systemGray3
         
         setNeedsLayout()
     }

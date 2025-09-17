@@ -24,8 +24,6 @@ final class TrackedItemsController: UIViewController {
     private let defaults = UserDefaultsKeys()
     private lazy var addedItems = defaults.getMovieIds(for: .tracked)
     
-    
-    
     // MARK: - Life cycle
     
     override func viewDidLoad() {
@@ -63,8 +61,6 @@ final class TrackedItemsController: UIViewController {
         
         refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
         tableView.refreshControl = refreshControl
-        
-        
     }
     
     private func setupNavbar() {

@@ -29,7 +29,7 @@ final class NetworkManager {
     private init() {}
     
     func loadData(completion: @escaping (Result<TrackedItem, Error>) -> Void) {
-        guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=2025&month=JANUARY") else {
+        guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=\(Calendar.current.component(.year, from: Date()))&month=JANUARY") else {
             return
         }
         
