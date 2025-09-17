@@ -49,9 +49,9 @@ private extension HomeViewCell {
         image.contentMode = .scaleAspectFill
         
         NSLayoutConstraint.activate([
-            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 0),
-            image.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
-            image.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            image.topAnchor.constraint(equalTo: contentView.topAnchor),
+            image.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             image.heightAnchor.constraint(equalToConstant: 180)
         ])
     }
@@ -64,9 +64,9 @@ private extension HomeViewCell {
         name.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            name.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 0),
-            name.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 0),
-            name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 4)
+            name.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            name.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 16)
         ])
     }
     
@@ -77,9 +77,9 @@ private extension HomeViewCell {
         year.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 0),
-            year.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 0),
-            year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
+            year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            year.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 8),
         ])
     }
 }
