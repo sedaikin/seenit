@@ -23,6 +23,7 @@ final class TrackedItemsController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTable()
+        setupNavbar()
         setupNotifications()
         loadInitialData()
     }
@@ -57,6 +58,11 @@ final class TrackedItemsController: UIViewController {
         tableView.rowHeight = UITableView.automaticDimension
         
         view.addSubview(tableView)
+    }
+    
+    private func setupNavbar() {
+        title = String(localized: "myList")
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
     }
     
     // MARK: - Actions

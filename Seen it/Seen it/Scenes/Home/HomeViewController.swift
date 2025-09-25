@@ -20,7 +20,7 @@ final class HomeViewController: UIViewController {
     private var collectionView: UICollectionView?
     private var dataSource: UICollectionViewDiffableDataSource<Section, FilmItem>?
     var sections = [
-        Section(id: 1, title: String(localized: "topFilms") + String(Calendar.current.component(.year, from: Date())), items: []),
+        Section(id: 1, title: String(localized: "topFilms") + getCurrentYear(), items: []),
         Section(id: 2, title: String(localized: "topShows"), items: [])
     ]
     
@@ -226,5 +226,12 @@ extension HomeViewController: UICollectionViewDelegate {
 
         let singleItemController = SingleItemController(id: singleItem.id)
         navigationController?.pushViewController(singleItemController, animated: true)
+    }
+}
+
+extension HomeViewController {
+    
+    static func getCurrentYear() -> String {
+        String(Calendar.current.component(.year, from: Date()))
     }
 }

@@ -5,12 +5,12 @@
 //  Created by Sedaykin Aleksey on 14.09.2025.
 //
 
-import UIKit
+import Foundation
 
 struct UserDefaultsKeys {
     enum ListType: String {
-        case tracked = "tracked"
-        case watched = "watched"
+        case tracked
+        case watched
     }
     
     func addMovieId(_ movieId: Int, to list: ListType) {
@@ -28,11 +28,11 @@ struct UserDefaultsKeys {
     }
     
     func containsMovieId(_ movieId: Int, in list: ListType) -> Bool {
-        return getMovieIds(for: list).contains(movieId)
+        getMovieIds(for: list).contains(movieId)
     }
     
     func getMovieIds(for list: ListType) -> [Int] {
-        return UserDefaults.standard.array(forKey: list.rawValue) as? [Int] ?? []
+        UserDefaults.standard.array(forKey: list.rawValue) as? [Int] ?? []
     }
     
     private func saveMovieIds(_ movieIds: [Int], for list: ListType) {
