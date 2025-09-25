@@ -12,36 +12,35 @@ final class TrackedItemsController: UIViewController {
     // MARK: - Private properties
     
     private let tableView = UITableView()
-    private let refreshControl = UIRefreshControl()
-    private let navigationBar = UINavigationBar()
-    private let titleLabel = UILabel()
-    private var subtitleLabel = UILabel()
-    private lazy var stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
-    private let defautls = UserDefaultsKeys()
+    private let defaults = UserDefaultsKeys()
     private lazy var filmsCount = defaults.getMovieIds(for: .watched).count
     
     private var trackedItems: [SingleTrackedItem] = []
-    private let defaults = UserDefaultsKeys()
     private lazy var addedItems = defaults.getMovieIds(for: .tracked)
     
     // MARK: - Life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupTable()
         setupNavbar()
-        //loadData()
+        setupTable()
+        setupNotifications()
+        loadInitialData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refreshData()
+        refreshAllData()
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         tableView.frame = view.bounds
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Setup
@@ -50,7 +49,6 @@ final class TrackedItemsController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(TrackedItemTableViewCell.self, forCellReuseIdentifier: TrackedItemTableViewCell.reuseID)
-        tableView.refreshControl = refreshControl
         tableView.backgroundColor = .background
         tableView.contentInset.top = 16
         tableView.separatorStyle = .singleLine
@@ -59,45 +57,42 @@ final class TrackedItemsController: UIViewController {
         tableView.tableHeaderView = UIView()
         tableView.rowHeight = UITableView.automaticDimension
         
-        refreshControl.addTarget(self, action: #selector(refreshData(_:)), for: .valueChanged)
-        tableView.refreshControl = refreshControl
+        view.addSubview(tableView)
     }
     
     private func setupNavbar() {
+        let titleLabel = UILabel()
         titleLabel.text = String(localized: "myList")
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         titleLabel.textColor = .white
-        
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = "2 фильма"
         subtitleLabel.font = UIFont.systemFont(ofSize: 12)
         subtitleLabel.textColor = .systemGray3
 
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
         stackView.axis = .vertical
         stackView.alignment = .center
-        
-        view.addSubview(tableView)
-        view.addSubview(navigationBar)
-        self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+
+        navigationItem.titleView = stackView
         
         let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .background
-        
-        navigationItem.titleView = stackView
-        navigationController?.additionalSafeAreaInsets.top = 5
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = navigationController?.navigationBar.standardAppearance
+        navigationController?.navigationBar.backgroundColor = .background
+
+        edgesForExtendedLayout = []
     }
     
     // MARK: - Actions
-    
-    @objc func refreshData(_ sender: UIRefreshControl) {
-        refreshData()
-    }
     
     func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath) {
         let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
         showAlert(title: "Отметить как " + (isWatched ? "непросмотренный" : "просмотренный?"), indexPath: indexPath)
     }
+    
 }
 
 // MARK: - UITableViewDelegate
@@ -152,32 +147,48 @@ extension TrackedItemsController {
 
 private extension TrackedItemsController {
     
-    func loadData() {
-        for addedItem in addedItems {
-            NetworkManager.shared.loadSingleData(id: addedItem) { [weak self] result in
-                guard let self else { return }
-                
-                switch result {
-                case .success(let item):
-                    DispatchQueue.main.async {
-                        self.trackedItems.append(item)
-                        self.tableView.reloadData()
-                        self.filmsCount = self.trackedItems.count
-                    }
-                case .failure(let error):
-                    print(error)
-                }
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(userDefaultsDidChange),
+            name: UserDefaults.didChangeNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(refreshWhenAppearing),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+    
+    func loadInitialData() {
+        NetworkManager.shared.loadDataForIds(addedItems) { [weak self] loadedItems in
+            DispatchQueue.main.async {
+                self?.trackedItems = loadedItems
+                self?.tableView.reloadData()
             }
         }
     }
     
-    func refreshData() {
-        trackedItems = []
-        addedItems = defaults.getMovieIds(for: .tracked)
-        loadData()
-        subtitleLabel.text = "Вы хотите посмотреть \(filmsCount) фильмов/сериалов"
-        tableView.reloadData()
-        self.refreshControl.endRefreshing()
+    func refreshAllData() {
+        let newItemIds = defaults.getMovieIds(for: .tracked)
+        
+        guard !newItemIds.isEmpty else {
+            addedItems.removeAll()
+            tableView.reloadData()
+            return
+        }
+        
+        NetworkManager.shared.loadDataForIds(newItemIds) { [weak self] loadedItems in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.trackedItems = loadedItems
+                self.tableView.reloadData()
+            }
+        }
     }
     
     func showAlert(title: String, isAdd: Bool = true, indexPath: IndexPath) {
@@ -185,12 +196,34 @@ private extension TrackedItemsController {
         let yesAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
             guard let self else { return }
             let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
-            isWatched ? defaults.removeMovieId(trackedItems[indexPath.row].id, from: .watched) : defautls.addMovieId(trackedItems[indexPath.row].id, to: .watched)
+            isWatched ? defaults.removeMovieId(trackedItems[indexPath.row].id, from: .watched) : defaults.addMovieId(trackedItems[indexPath.row].id, to: .watched)
             tableView.reloadData()
         }
         alert.addAction(yesAction)
         alert.addAction(UIAlertAction(title: "Отмена", style: .default))
         present(alert, animated: true)
+    }
+    
+}
+
+private extension TrackedItemsController {
+    
+    // MARK: -Objc funcs
+    
+    @objc private func userDefaultsDidChange(_ notification: Notification) {
+        
+       let newIds = defaults.getMovieIds(for: .tracked)
+       let currentIds = addedItems.map { $0 }
+       
+       if newIds != currentIds {
+       DispatchQueue.main.async {
+               self.refreshAllData()
+           }
+       }
+    }
+    
+    @objc private func refreshWhenAppearing() {
+        refreshAllData()
     }
     
 }

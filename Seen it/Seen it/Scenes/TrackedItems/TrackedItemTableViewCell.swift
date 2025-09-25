@@ -47,13 +47,6 @@ final class TrackedItemTableViewCell: UITableViewCell {
     func configure(with trackedItem: SingleTrackedItem) {
         self.trackedItem = trackedItem
         
-        if let allDuration = trackedItem.duration {
-            let hours = String(allDuration/60)
-            let minutes = String(allDuration%60)
-            
-            duration.text = " \u{2022} " + (hours != "0" ? hours + " \(String(localized: "hours")) " : "") + minutes + " \(String(localized: "mins"))"
-        }
-        
         guard let url = URL(string: trackedItem.image) else {
             return
         }
@@ -64,6 +57,13 @@ final class TrackedItemTableViewCell: UITableViewCell {
         let isWatched = UserDefaultsKeys().containsMovieId(trackedItem.id, in: .watched)
         buttonTracked.setImage(UIImage(systemName: isWatched ? "eye.fill" : "eye"), for: .normal)
         buttonTracked.tintColor = isWatched ? .active : .systemGray3
+        
+        if let allDuration = trackedItem.duration {
+            let hours = String(allDuration/60)
+            let minutes = String(allDuration%60)
+            
+            duration.text = " \u{2022} " + (hours != "0" ? hours + " \(String(localized: "hours")) " : "") + minutes + " \(String(localized: "mins"))"
+        }
         
         setNeedsLayout()
     }
@@ -116,14 +116,12 @@ private extension TrackedItemTableViewCell {
     func setupItemYear() {
         year.font = .systemFont(ofSize: 12, weight: .light)
         year.textColor = .systemGray4
-        year.numberOfLines = 1
-        year.sizeToFit()
         
         year.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
-            //year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor),
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
             year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34)
         ])

@@ -29,17 +29,8 @@ final class MainTabBarController: UITabBarController {
         
         UITabBarItem.appearance().titlePositionAdjustment = UIOffset(horizontal: 0, vertical: -10)
         
-        UITabBar.appearance().itemPositioning = .centered
-        UITabBar.appearance().unselectedItemTintColor = .gray
-        UITabBar.appearance().tintColor = .blue
-
-        UITabBarItem.appearance().setTitleTextAttributes([.foregroundColor: UIColor.clear], for: .normal)
-        UITabBarItem.appearance().setTitleTextAttributes([.foregroundColor: UIColor.clear], for: .selected)
-        
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
-        tabBarItem.title = nil
-        tabBarItem.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
     }
     
     private func setupTabBar() {
@@ -48,13 +39,14 @@ final class MainTabBarController: UITabBarController {
         let trackedItemsViewController = setupTrackedItemsViewController()
         
         viewControllers = [homeViewController, searchViewController, trackedItemsViewController]
+
     }
 }
 
+// MARK: - View Controllers
+
 private extension MainTabBarController {
-    
-    // MARK: - View Controllers
-    
+
     func setupHomeViewController() -> UIViewController {
         let viewController = HomeViewController()
         
