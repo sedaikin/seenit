@@ -22,7 +22,6 @@ final class TrackedItemsController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupNavbar()
         setupTable()
         setupNotifications()
         loadInitialData()
@@ -58,32 +57,6 @@ final class TrackedItemsController: UIViewController {
         tableView.rowHeight = UITableView.automaticDimension
         
         view.addSubview(tableView)
-    }
-    
-    private func setupNavbar() {
-        let titleLabel = UILabel()
-        titleLabel.text = String(localized: "myList")
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        titleLabel.textColor = .white
-
-        let subtitleLabel = UILabel()
-        subtitleLabel.text = "2 фильма"
-        subtitleLabel.font = UIFont.systemFont(ofSize: 12)
-        subtitleLabel.textColor = .systemGray3
-
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
-        stackView.axis = .vertical
-        stackView.alignment = .center
-
-        navigationItem.titleView = stackView
-        
-        let appearance = UINavigationBarAppearance()
-        appearance.backgroundColor = .background
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = navigationController?.navigationBar.standardAppearance
-        navigationController?.navigationBar.backgroundColor = .background
-
-        edgesForExtendedLayout = []
     }
     
     // MARK: - Actions

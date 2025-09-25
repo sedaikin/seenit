@@ -47,18 +47,12 @@ final class SingleItemController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupTransparentNavBar()
         addSubViews()
         loadData()
         setupUI()
         setupCustomBackButton()
         
         view.backgroundColor = .background
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        restoreDefaultNavBar()
     }
 }
 
@@ -88,35 +82,6 @@ private extension SingleItemController {
     }
     
     // MARK: - Setup views
-    
-    func setupTransparentNavBar() {
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithTransparentBackground()
-        
-        appearance.titleTextAttributes = [
-            .foregroundColor: UIColor.white,
-            .font: UIFont.boldSystemFont(ofSize: 18)
-        ]
-        
-        appearance.shadowColor = .clear
-        appearance.shadowImage = UIImage()
-        
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        navigationController?.navigationBar.compactAppearance = appearance
-        
-        navigationController?.navigationBar.isTranslucent = true
-        navigationController?.navigationBar.tintColor = .white
-    }
-    
-    func restoreDefaultNavBar() {
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .background
-        
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
-    }
     
 //    func setupScrollView() {
 //        scrollView.translatesAutoresizingMaskIntoConstraints = false
