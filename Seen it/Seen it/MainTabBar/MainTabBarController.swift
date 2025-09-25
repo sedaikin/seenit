@@ -39,12 +39,14 @@ final class MainTabBarController: UITabBarController {
         let trackedItemsViewController = setupTrackedItemsViewController()
         
         viewControllers = [homeViewController, searchViewController, trackedItemsViewController]
+
     }
 }
 
+// MARK: - View Controllers
+
 private extension MainTabBarController {
-    
-    // MARK: - View Controllers
+
     func setupHomeViewController() -> UIViewController {
         let viewController = HomeViewController()
         

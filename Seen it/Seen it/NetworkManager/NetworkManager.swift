@@ -60,6 +60,32 @@ final class NetworkManager {
         dataTask.resume()
     }
     
+    func loadDataForIds(_ ids: [Int], completion: @escaping ([SingleTrackedItem]) -> Void) {
+       var loadedItems: [SingleTrackedItem] = []
+       let group = DispatchGroup()
+       
+       for id in ids {
+           group.enter()
+           
+           loadSingleData(id: id) { result in
+               switch result {
+               case .success(let item):
+                   loadedItems.append(item)
+               case .failure(let error):
+                   print("Error loading item \(id): \(error)")
+               }
+               group.leave()
+           }
+       }
+       
+       group.notify(queue: .global(qos: .background)) {
+           let sortedItems = ids.compactMap { id in
+               loadedItems.first { $0.id == id }
+           }
+           completion(sortedItems)
+       }
+   }
+    
     func loadSingleData(id: Int, completion: @escaping (Result<SingleTrackedItem, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/\(id)") else {
             return

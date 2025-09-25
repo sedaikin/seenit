@@ -20,17 +20,14 @@ final class HomeViewController: UIViewController {
     private var collectionView: UICollectionView?
     private var dataSource: UICollectionViewDiffableDataSource<Section, FilmItem>?
     var sections = [
-        Section(id: 1, title: String(localized: "topFilms") + String(Calendar.current.component(.year, from: Date())), items: []),
+        Section(id: 1, title: String(localized: "topFilms") + getCurrentYear(), items: []),
         Section(id: 2, title: String(localized: "topShows"), items: [])
     ]
-    
     
     // MARK: - Life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = UIColor(named: "background")
         
         setupCollectionView()
         configureDataSource()
@@ -42,6 +39,8 @@ final class HomeViewController: UIViewController {
 // MARK: - Private
 
 private extension HomeViewController {
+    
+    // MARK: - Setup collectionView with UICollectionViewLayout
     
     func setupCollectionView() {
         let collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
@@ -64,44 +63,44 @@ private extension HomeViewController {
             return self?.createSectionLayout()
         }
     }
-        
+    
     func createSectionLayout() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .fractionalHeight(1.0)
-        )
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0)
+            let itemSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .fractionalHeight(1.0)
+            )
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0)
         
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .absolute(150),
-            heightDimension: .absolute(270)
-        )
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-        group.contentInsets = NSDirectionalEdgeInsets(
-            top: 0,
-            leading: 0,
-            bottom: 32,
-            trailing: 0
-        )
-        
-        let section = NSCollectionLayoutSection(group: group)
-        section.orthogonalScrollingBehavior = .continuous
-        
-        let headerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(50)
-        )
-        let header = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-        section.boundarySupplementaryItems = [header]
-        
-        return section
-    }
-        
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .absolute(150),
+                heightDimension: .absolute(270)
+            )
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            group.contentInsets = NSDirectionalEdgeInsets(
+                top: 0,
+                leading: 0,
+                bottom: 32,
+                trailing: 0
+            )
+            
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .continuous
+            
+            let headerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .absolute(50)
+            )
+            let header = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerSize,
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top
+            )
+            section.boundarySupplementaryItems = [header]
+            
+            return section
+        }
+    
     func configureDataSource() {
         guard let collectionView = collectionView else {
             return
@@ -120,7 +119,7 @@ private extension HomeViewController {
         
         self.dataSource = dataSource
     }
-        
+    
     func createCell(collectionView: UICollectionView, indexPath: IndexPath, filmItem: FilmItem) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: HomeViewCell.reuseID,
@@ -131,7 +130,7 @@ private extension HomeViewController {
         cell.configure(with: filmItem)
         return cell
     }
-    
+        
     func createHeader(collectionView: UICollectionView, kind: String, indexPath: IndexPath) -> UICollectionReusableView? {
         guard kind == UICollectionView.elementKindSectionHeader else { return nil }
         
@@ -144,14 +143,14 @@ private extension HomeViewController {
         }
         
         if let snapshot = dataSource?.snapshot(), indexPath.section < snapshot.sectionIdentifiers.count {
-            let section = snapshot.sectionIdentifiers[indexPath.section]
-            header.configure(with: section.title)
-        }
-        
-        return header
+           let section = snapshot.sectionIdentifiers[indexPath.section]
+           header.configure(with: section.title)
+       }
+       
+       return header
     }
-    
-    func applySnapshot() {
+
+     func applySnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, FilmItem>()
         snapshot.appendSections(sections)
         
@@ -161,14 +160,15 @@ private extension HomeViewController {
         
         dataSource?.apply(snapshot, animatingDifferences: true)
     }
+    
 }
 
-
 private extension HomeViewController {
+    
+    // MARK: Load data
+    
+    func loadData() {
         
-        // MARK: Load data
-        
-        func loadData() {
         let loadDataQueue = DispatchQueue(label: "ru.seenit.collection")
         let dispatchGroup = DispatchGroup()
         
@@ -220,12 +220,18 @@ extension HomeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at:indexPath, animated: true)
         guard let dataSource = dataSource,
-            let singleItem = dataSource.itemIdentifier(for: indexPath) else {
+              let singleItem = dataSource.itemIdentifier(for: indexPath) else {
             return
         }
-        
-        let singleItemController = SingleItemController(singleItem: singleItem)
-        singleItemController.hidesBottomBarWhenPushed = true
+
+        let singleItemController = SingleItemController(id: singleItem.id)
         navigationController?.pushViewController(singleItemController, animated: true)
+    }
+}
+
+extension HomeViewController {
+    
+    static func getCurrentYear() -> String {
+        String(Calendar.current.component(.year, from: Date()))
     }
 }

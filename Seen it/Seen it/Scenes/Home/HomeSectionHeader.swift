@@ -2,12 +2,12 @@
 //  HomeSectionHeader.swift
 //  Seen it
 //
-//  Created by Sedaykin Aleksey on 17.09.2025.
+//  Created by Sedaykin Aleksey on 16.09.2025.
 //
 
 import UIKit
 
-class SectionHeaderView: UICollectionReusableView {
+final class SectionHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "SectionHeaderView"
     
     // MARK: - Property

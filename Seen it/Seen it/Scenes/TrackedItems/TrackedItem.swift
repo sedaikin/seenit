@@ -25,8 +25,3 @@ struct FilmItem: Decodable, Hashable {
     }
 }
 
-// Временное место, потом поправлю когда буду знать как хранить данные на девайсе
-
-struct IsTracked {
-    let isTracked: Bool = false
-}
