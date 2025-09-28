@@ -149,5 +149,38 @@ final class NetworkManager {
         
         dataTask.resume()
     }
-    
+
+    func loadFilmsByKeyword(keyword: String, completion: @escaping (Result<KeyboardResponse, Error>) -> Void) {
+        guard let url = URL(string: "https://kinopoiskapiunofficial.tech//api/v2.1/films/search-by-keyword/?keyword=\(keyword)&page=1") else {
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue(Self.apiKey, forHTTPHeaderField: "X-API-KEY")
+
+        let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error {
+                print(error)
+                return
+            }
+
+            guard let data else {
+                print("no data")
+                return
+            }
+
+            let decoder = JSONDecoder()
+            do {
+                let film = try decoder.decode(KeyboardResponse.self, from: data)
+                completion(.success(film))
+            } catch {
+                print(error)
+            }
+        }
+
+        dataTask.resume()
+    }
+
+
 }

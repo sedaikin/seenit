@@ -8,9 +8,9 @@
 import UIKit
 
 final class SingleItemController: UIViewController {
-    
+
     // MARK: - Properties
-    
+
     private let name = UILabel()
     private let textDescription = UILabel()
     private let year = UILabel()
@@ -32,26 +32,25 @@ final class SingleItemController: UIViewController {
     var item: SingleTrackedItem?
     
     let id: Int
-    
+
     // MARK: - Life cycle
 
     init(id: Int) {
         self.id = id
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         addSubViews()
         loadData()
         setupUI()
         setupCustomBackButton()
-        
+
         view.backgroundColor = .background
     }
 }
@@ -59,10 +58,10 @@ final class SingleItemController: UIViewController {
 // MARK: - Private
 
 private extension SingleItemController {
-    
+
     func loadData() {
             NetworkManager.shared.loadSingleData(id: id) { result in
-            
+
             switch result {
             case .success(let item):
                 DispatchQueue.main.async {
@@ -74,13 +73,13 @@ private extension SingleItemController {
             }
         }
     }
-    
+
     // MARK: - Add subViews
-    
+
     func addSubViews() {
         view.addSubviews(scrollView,poster,name, year, duration, genresTitle, genres, titleDescription, textDescription, ratingsTitle, ratingKp, ratingImdb, buttonAdded, buttonTracked)
     }
-    
+
     // MARK: - Setup views
     
 //    func setupScrollView() {
@@ -101,7 +100,26 @@ private extension SingleItemController {
 //        ])
 //    }
 
+    func setupScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: poster.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor) // Важно!
+        ])
+    }
+
     func setupUI () {
+
         //setupScrollView()
         setupPoster()
         setupName()
@@ -117,11 +135,11 @@ private extension SingleItemController {
         setupRatingKp()
         setupRatingIMDB()
     }
-    
+
     func setupPoster() {
         poster.contentMode = .scaleAspectFill
         poster.clipsToBounds = true
-        
+
         poster.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             poster.topAnchor.constraint(equalTo:view.topAnchor, constant: 0),
@@ -130,12 +148,12 @@ private extension SingleItemController {
             poster.heightAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.75)
         ])
     }
-    
+
     func setupName() {
         name.font = .boldSystemFont(ofSize: 24)
         name.textColor = .white
         name.numberOfLines = 0
-        
+
         name.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             name.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
@@ -143,7 +161,7 @@ private extension SingleItemController {
             name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0)
         ])
     }
-    
+
     func setupButtonTracked() {
         var config = UIButton.Configuration.plain()
         config.image = UIImage(systemName: isWatched ? "eye.fill" : "eye")
@@ -155,7 +173,6 @@ private extension SingleItemController {
         buttonTracked.contentVerticalAlignment = .fill
         buttonTracked.imageView?.contentMode = .scaleAspectFit
         buttonTracked.addTarget(self, action: #selector(didTapTrackedButton), for: .touchUpInside)
-        
         buttonTracked.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             buttonTracked.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
@@ -165,7 +182,7 @@ private extension SingleItemController {
             buttonTracked.heightAnchor.constraint(equalToConstant: 32)
         ])
     }
-    
+
     func setupButtonAdded() {
         buttonAdded.tintColor = isTracked ? .active : .systemGray3
         let image = isTracked ? "minus.square.fill" : "plus.app"
@@ -174,7 +191,6 @@ private extension SingleItemController {
         buttonAdded.contentVerticalAlignment = .fill
         buttonAdded.imageView?.contentMode = .scaleAspectFit
         buttonAdded.addTarget(self, action: #selector(didTapAddedButton), for: .touchUpInside)
-        
         buttonAdded.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             buttonAdded.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
@@ -184,11 +200,11 @@ private extension SingleItemController {
             buttonAdded.heightAnchor.constraint(equalToConstant: 32)
         ])
     }
-    
+
     func setupYear() {
         year.font = .boldSystemFont(ofSize: 16)
         year.textColor = .systemGray2
-        
+
         year.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
@@ -196,11 +212,11 @@ private extension SingleItemController {
             year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0)
         ])
     }
-    
+
     func setupDuration() {
         duration.font = .boldSystemFont(ofSize: 16)
         duration.textColor = .systemGray2
-        
+
         duration.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
@@ -208,12 +224,12 @@ private extension SingleItemController {
             duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0)
         ])
     }
-    
+
     func setupGenresTitle() {
         genresTitle.text = String(localized: "genres")
         genresTitle.font = .boldSystemFont(ofSize: 14)
         genresTitle.textColor = .white
-        
+
         genresTitle.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             genresTitle.topAnchor.constraint(equalTo: year.bottomAnchor, constant: 28),
@@ -221,12 +237,12 @@ private extension SingleItemController {
             genresTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
         ])
     }
-    
+
     func setupGenres() {
         genres.font = .systemFont(ofSize: 12)
         genres.textColor = .systemGray3
         genres.numberOfLines = 0
-        
+
         genres.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             genres.topAnchor.constraint(equalTo: genresTitle.bottomAnchor, constant: 6),
@@ -234,12 +250,12 @@ private extension SingleItemController {
             genres.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
     }
-    
+
     func setupTitleDescription() {
         titleDescription.text = String(localized: "description")
         titleDescription.font = .boldSystemFont(ofSize: 14)
         titleDescription.textColor = .white
-        
+
         titleDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             titleDescription.topAnchor.constraint(equalTo: genres.bottomAnchor, constant: 28),
@@ -247,12 +263,12 @@ private extension SingleItemController {
             titleDescription.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
         ])
     }
-    
+
     func setupTextDescription() {
         textDescription.font = .systemFont(ofSize: 12)
         textDescription.textColor = .systemGray3
         textDescription.numberOfLines = 0
-        
+
         textDescription.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             textDescription.topAnchor.constraint(equalTo: titleDescription.bottomAnchor, constant: 6),
@@ -260,12 +276,12 @@ private extension SingleItemController {
             textDescription.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
     }
-    
+
     func setupRatingsTitle() {
         ratingsTitle.text = String(localized: "rating")
         ratingsTitle.textColor = .white
         ratingsTitle.font = .boldSystemFont(ofSize: 14)
-        
+
         ratingsTitle.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             ratingsTitle.topAnchor.constraint(equalTo: textDescription.bottomAnchor, constant: 28),
@@ -273,11 +289,11 @@ private extension SingleItemController {
             ratingsTitle.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
     }
-    
+
     func setupRatingKp() {
         ratingKp.font = .systemFont(ofSize: 12)
         ratingKp.textColor = .systemGray3
-        
+
         ratingKp.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             ratingKp.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
@@ -285,11 +301,11 @@ private extension SingleItemController {
             ratingKp.trailingAnchor.constraint(equalTo: ratingImdb.leadingAnchor, constant: 0),
         ])
     }
-    
+
     func setupRatingIMDB() {
         ratingImdb.font = .systemFont(ofSize: 12)
         ratingImdb.textColor = .systemGray3
-        
+
         ratingImdb.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             ratingImdb.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
@@ -297,72 +313,72 @@ private extension SingleItemController {
             ratingImdb.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
         ])
     }
-    
+
     func setupCustomBackButton() {
         var config = UIButton.Configuration.plain()
-        
+
         config.image = UIImage(systemName: "arrow.left")
         config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 12, weight: .bold)
-        
+
         let backButton = UIButton(configuration: config)
         backButton.tintColor = .white
-        
+
         backButton.backgroundColor = .active
         backButton.layer.cornerRadius = 15
         backButton.layer.masksToBounds = true
-        
+
         backButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             backButton.widthAnchor.constraint(equalToConstant: 30),
             backButton.heightAnchor.constraint(equalToConstant: 30)
         ])
-        
+
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
     }
-    
+
     // MARK: - Update UI
-    
+
     func updateUI() {
         guard let item, let url = URL(string: item.image) else {
             return
         }
-        
+
         poster.setImage(url: url)
-        
+
         name.text = item.name
         year.text = String(item.year)
         textDescription.text = item.description
         genres.text = item.genres.map { $0.genre }.joined(separator: ", ")
-        
+
         guard let ratingKinopoisk = item.ratingKinopoisk else {
             ratingKp.text = String(localized: "noRating")
             return
         }
-        
+
         ratingKp.text = "Кинопоиск: " + String(ratingKinopoisk)
-    
+
         guard let ratingImdbUnwrapped = item.ratingImdb else {
             return
         }
-        
+
         ratingImdb.text = " | IMDB: " + String(ratingImdbUnwrapped)
-        
+
         if let allDuration = item.duration {
             let hours = String(allDuration/60)
             let minutes = String(allDuration%60)
-            
+
             duration.text = " \u{2022} " + (hours != "0" ? hours + " \(String(localized: "hours")) " : "") + minutes + " \(String(localized: "mins"))"
         }
     }
-    
+
 }
 
 // MARK: - Actions
 
 private extension SingleItemController {
-    
+
     @objc func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
