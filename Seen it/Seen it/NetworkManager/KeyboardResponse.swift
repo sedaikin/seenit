@@ -20,8 +20,15 @@ struct Film: Decodable {
     let description: String?
     let filmLength: String?
     let countries: [Country]?
+    let genres: [Genre]?
+    let posterUrl: String?
+    let posterUrlPreview: String?
 }
 
 struct Country: Codable {
     let country: String
+}
+
+struct Genre: Codable {
+    let genre: String
 }

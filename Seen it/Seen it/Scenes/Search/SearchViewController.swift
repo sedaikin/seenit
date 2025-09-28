@@ -70,10 +70,11 @@ private extension SearchViewController {
     }
 
     func setupSearchResultsTableView() {
-        searchResultsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "SearchResultCell")
+        searchResultsTableView.register(SearchResultCell.self, forCellReuseIdentifier: SearchResultCell.reuseID)
         searchResultsTableView.delegate = self
         searchResultsTableView.dataSource = self
         searchResultsTableView.separatorStyle = .none
+        searchResultsTableView.rowHeight = 120
 
         view.addSubview(searchResultsTableView)
 
@@ -232,22 +233,18 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SearchResultCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: SearchResultCell.reuseID, for: indexPath) as? SearchResultCell else {
+            return UITableViewCell()
+        }
+
         let film = searchResults[indexPath.row]
-
-        let filmName = film.nameRu ?? film.nameEn ?? "Неизвестное название"
-        let year = film.year ?? "год не указан"
-
-        cell.textLabel?.text = "\(filmName) (\(year))"
-        cell.textLabel?.textColor = .white
-        cell.backgroundColor = UIColor(named: "background")
-        cell.selectionStyle = .none
-
+        cell.configure(with: film)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let film = searchResults[indexPath.row]
+
         let singleItemController = SingleItemController(id: film.filmId)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
@@ -256,6 +253,6 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60
+        return 120
     }
 }
