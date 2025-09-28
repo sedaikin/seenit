@@ -150,8 +150,16 @@ final class NetworkManager {
         dataTask.resume()
     }
 
-    func loadFilmsByKeyword(keyword: String, completion: @escaping (Result<KeyboardResponse, Error>) -> Void) {
-        guard let url = URL(string: "https://kinopoiskapiunofficial.tech//api/v2.1/films/search-by-keyword/?keyword=\(keyword)&page=1") else {
+    func loadFilmsByKeyword(keyword: String, page: Int, completion: @escaping (Result<KeyboardResponse, Error>) -> Void) {
+        var urlComponents = URLComponents(string: "https://kinopoiskapiunofficial.tech/api/v2.1/films/search-by-keyword")!
+        
+        urlComponents.queryItems = [
+            URLQueryItem(name: "keyword", value: keyword),
+            URLQueryItem(name: "page", value: "\(page)")
+        ]
+        
+        guard let url = urlComponents.url else {
+            print("Invalid URL")
             return
         }
 
@@ -181,6 +189,4 @@ final class NetworkManager {
 
         dataTask.resume()
     }
-
-
 }

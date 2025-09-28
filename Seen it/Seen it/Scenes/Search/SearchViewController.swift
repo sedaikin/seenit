@@ -14,7 +14,7 @@ final class SearchViewController: UIViewController {
     private var filmsCollectionView: UICollectionView?
     private let topFilmsLabel = UILabel()
     private var films: [FilmItem] = []
-    private var filteredFilms: [FilmItem] = []
+    private var searchResults: [Film] = []
     private var isSearching: Bool = false
 
     private let searchResultsTableView: UITableView = {
@@ -156,7 +156,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if isSearching {
-            return filteredFilms.count
+            return searchResults.count
         }
         return films.count
     }
@@ -187,16 +187,29 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 extension SearchViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text, !searchText.isEmpty else {
-            filteredFilms.removeAll()
+            searchResults.removeAll()
             searchResultsTableView.reloadData()
             return
         }
 
-        filteredFilms = films.filter { film in
-            film.name.lowercased().contains(searchText.lowercased())
-        }
+        NSObject.cancelPreviousPerformRequests(withTarget: self)
+        perform(#selector(performSearch(_:)), with: searchText, afterDelay: 1)
+    }
 
-        searchResultsTableView.reloadData()
+    @objc private func performSearch(_ searchText: String) {
+        NetworkManager.shared.loadFilmsByKeyword(keyword: searchText, page: 1) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let response):
+                    self?.searchResults = response.films
+                    self?.searchResultsTableView.reloadData()
+                case .failure(let error):
+                    print("Search error: \(error)")
+                    self?.searchResults.removeAll()
+                    self?.searchResultsTableView.reloadData()
+                }
+            }
+        }
     }
 }
 
@@ -209,21 +222,23 @@ extension SearchViewController: UISearchControllerDelegate {
     func willDismissSearchController(_ searchController: UISearchController) {
         hideSearchResults()
         isSearching = false
-        filteredFilms.removeAll()
+        searchResults.removeAll()
     }
 }
 
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredFilms.count
+        return searchResults.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "SearchResultCell", for: indexPath)
-        let film = filteredFilms[indexPath.row]
+        let film = searchResults[indexPath.row]
 
-        // Настройка ячейки
-        cell.textLabel?.text = film.name
+        let filmName = film.nameRu ?? film.nameEn ?? "Неизвестное название"
+        let year = film.year ?? "год не указан"
+
+        cell.textLabel?.text = "\(filmName) (\(year))"
         cell.textLabel?.textColor = .white
         cell.backgroundColor = UIColor(named: "background")
         cell.selectionStyle = .none
@@ -232,8 +247,8 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let filmItem = filteredFilms[indexPath.row]
-        let singleItemController = SingleItemController(id: filmItem.id)
+        let film = searchResults[indexPath.row]
+        let singleItemController = SingleItemController(id: film.filmId)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
 
