@@ -42,9 +42,10 @@ final class MainTabBarController: UITabBarController {
     }
 }
 
+// MARK: - View Controllers
+
 private extension MainTabBarController {
-    
-    // MARK: - View Controllers
+
     func setupHomeViewController() -> UIViewController {
         let viewController = HomeViewController()
         

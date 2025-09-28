@@ -174,7 +174,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         collectionView.deselectItem(at: indexPath, animated: true)
 
         let filmItem = films[indexPath.row]
-        let singleItemController = SingleItemController(singleItem: filmItem)
+        let singleItemController = SingleItemController(id: filmItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
 
@@ -233,7 +233,7 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let filmItem = filteredFilms[indexPath.row]
-        let singleItemController = SingleItemController(singleItem: filmItem)
+        let singleItemController = SingleItemController(id: filmItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
 

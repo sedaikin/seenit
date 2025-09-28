@@ -11,7 +11,7 @@ enum filmsCollection {
     case topAll
     case topMovies
     case topShows
-
+    
     var type: String {
         switch self {
             case .topAll: return "TOP_POPULAR_ALL"
@@ -22,14 +22,14 @@ enum filmsCollection {
 }
 
 final class NetworkManager {
-    static let apiKey = "230cc843-7dc4-4550-a211-8b4659c59e1f"
-
+    static let apiKey = "0a4295d8-96b2-4396-9eee-4adbe7abd394"
+    
     static let shared = NetworkManager()
-
+    
     private init() {}
     
     func loadData(completion: @escaping (Result<TrackedItem, Error>) -> Void) {
-        guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=2025&month=JANUARY") else {
+        guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=\(Calendar.current.component(.year, from: Date()))&month=JANUARY") else {
             return
         }
         
@@ -59,6 +59,32 @@ final class NetworkManager {
         
         dataTask.resume()
     }
+    
+    func loadDataForIds(_ ids: [Int], completion: @escaping ([SingleTrackedItem]) -> Void) {
+       var loadedItems: [SingleTrackedItem] = []
+       let group = DispatchGroup()
+       
+       for id in ids {
+           group.enter()
+           
+           loadSingleData(id: id) { result in
+               switch result {
+               case .success(let item):
+                   loadedItems.append(item)
+               case .failure(let error):
+                   print("Error loading item \(id): \(error)")
+               }
+               group.leave()
+           }
+       }
+       
+       group.notify(queue: .global(qos: .background)) {
+           let sortedItems = ids.compactMap { id in
+               loadedItems.first { $0.id == id }
+           }
+           completion(sortedItems)
+       }
+   }
     
     func loadSingleData(id: Int, completion: @escaping (Result<SingleTrackedItem, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/\(id)") else {
@@ -88,15 +114,15 @@ final class NetworkManager {
                 print(error)
             }
         }
-
+        
         dataTask.resume()
     }
-
+    
     func loadCollection(type: String, page: Int, completion: @escaping (Result<TrackedItem, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/collections?type=\(type)&page=\(page)") else {
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue(Self.apiKey, forHTTPHeaderField: "X-API-KEY")
@@ -106,12 +132,12 @@ final class NetworkManager {
                 print(error)
                 return
             }
-
+            
             guard let data else {
                 print("no data")
                 return
             }
-
+            
             let decoder = JSONDecoder()
             do {
                 let trackedItem = try decoder.decode(TrackedItem.self, from: data)
@@ -120,7 +146,7 @@ final class NetworkManager {
                 print(error)
             }
         }
-
+        
         dataTask.resume()
     }
 
@@ -155,5 +181,6 @@ final class NetworkManager {
 
         dataTask.resume()
     }
+
 
 }

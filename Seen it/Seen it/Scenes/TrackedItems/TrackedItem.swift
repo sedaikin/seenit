@@ -9,7 +9,7 @@ struct TrackedItem: Decodable {
     let items: [FilmItem]
 }
 
-struct FilmItem: Decodable {
+struct FilmItem: Decodable, Hashable {
     let id: Int
     let name: String
     let year: Int
@@ -23,11 +23,5 @@ struct FilmItem: Decodable {
         case duration = "duration"
         case image = "posterUrl"
     }
-}
-
-// Временное место, потом поправлю когда буду знать как хранить данные на девайсе
-
-struct IsTracked {
-    let isTracked: Bool = false
 }
 

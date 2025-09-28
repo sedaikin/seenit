@@ -6,6 +6,7 @@
 //
 
 struct SingleTrackedItem: Decodable {
+    let id: Int
     let name: String
     let image: String
     let description: String
@@ -14,8 +15,10 @@ struct SingleTrackedItem: Decodable {
     let ratingImdb: Double?
     let ratingKinopoisk: Double?
     let genres: [Genres]
+    let type: String
     
     private enum CodingKeys: String, CodingKey {
+        case id = "kinopoiskId"
         case name = "nameRu"
         case image = "posterUrl"
         case description
@@ -24,6 +27,7 @@ struct SingleTrackedItem: Decodable {
         case ratingImdb
         case ratingKinopoisk
         case genres
+        case type
     }
 }
 
