@@ -125,7 +125,7 @@ private extension SearchViewController {
             collectionView.topAnchor.constraint(equalTo: topFilmsLabel.bottomAnchor, constant: 16),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.heightAnchor.constraint(equalToConstant: 200)
+            collectionView.heightAnchor.constraint(equalToConstant: 270)
         ])
 
         filmsCollectionView = collectionView
