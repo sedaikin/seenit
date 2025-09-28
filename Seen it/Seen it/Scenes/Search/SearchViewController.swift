@@ -258,7 +258,7 @@ private extension SearchViewController {
     }
 }
 
-// MARK: - UICollectionView DataSource & Delegate
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -295,11 +295,11 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
     }
 }
 
-// MARK: - UITableView DataSource & Delegate
+// MARK: - UITableViewDataSource, UITableViewDelegate
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchResults.count
+        searchResults.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
