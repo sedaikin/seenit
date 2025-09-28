@@ -21,6 +21,13 @@ enum filmsCollection {
     }
 }
 
+enum NetworkError: Error {
+    case invalidURL
+    case noData
+    case serverError(statusCode: Int)
+    case decodingError
+}
+
 final class NetworkManager {
     static let apiKey = "0a4295d8-96b2-4396-9eee-4adbe7abd394"
     
@@ -157,9 +164,9 @@ final class NetworkManager {
             URLQueryItem(name: "keyword", value: keyword),
             URLQueryItem(name: "page", value: "\(page)")
         ]
-        
+
         guard let url = urlComponents.url else {
-            print("Invalid URL")
+            completion(.failure(NetworkError.invalidURL))
             return
         }
 
@@ -168,13 +175,22 @@ final class NetworkManager {
         request.setValue(Self.apiKey, forHTTPHeaderField: "X-API-KEY")
 
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+
             if let error {
-                print(error)
+                completion(.failure(error))
                 return
             }
 
+            if let httpResponse = response as? HTTPURLResponse {
+
+                if httpResponse.statusCode != 200 {
+                    completion(.failure(NetworkError.serverError(statusCode: httpResponse.statusCode)))
+                    return
+                }
+            }
+
             guard let data else {
-                print("no data")
+                completion(.failure(NetworkError.noData))
                 return
             }
 
@@ -183,7 +199,7 @@ final class NetworkManager {
                 let film = try decoder.decode(KeyboardResponse.self, from: data)
                 completion(.success(film))
             } catch {
-                print(error)
+                completion(.failure(error))
             }
         }
 
