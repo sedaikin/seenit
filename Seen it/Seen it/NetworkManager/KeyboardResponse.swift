@@ -20,33 +20,15 @@ struct Film: Decodable {
     let description: String?
     let filmLength: String?
     let countries: [Country]?
+    let genres: [Genre]?
+    let posterUrl: String?
+    let posterUrlPreview: String?
 }
 
 struct Country: Codable {
     let country: String
 }
 
-extension Film {
-    func toFilmItem() -> FilmItem {
-        return FilmItem(
-            id: self.filmId,
-            name: self.nameRu ?? self.nameEn ?? "Без названия",
-            year: Int(self.year ?? "0") ?? 0,
-            duration: self.filmLength?.toMinutes(),
-            image: ""
-        )
-    }
+struct Genre: Codable {
+    let genre: String
 }
-
-extension String {
-    func toMinutes() -> Int? {
-        let components = self.split(separator: ":")
-        guard components.count >= 2,
-              let hours = Int(components[0]),
-              let minutes = Int(components[1]) else {
-            return nil
-        }
-        return hours * 60 + minutes
-    }
-}
-
