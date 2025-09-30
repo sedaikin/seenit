@@ -219,7 +219,8 @@ final class DetailScreenView: UIView {
     // MARK: - Update UI funcs
     
     func updateUI(_ viewModel: DetailScreenViewModel) {
-        guard let detailInfo = viewModel.detailInfo, let url = URL(string: detailInfo.image) else {
+        guard let detailInfo = viewModel.detailInfo,
+              let url = URL(string: detailInfo.image) else {
             return
         }
         

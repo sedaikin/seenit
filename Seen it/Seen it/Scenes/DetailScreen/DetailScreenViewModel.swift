@@ -26,7 +26,6 @@ final class DetailScreenViewModel {
             case .success(let item):
                 DispatchQueue.main.async {
                     self?.detailInfo = item
-                    
                 }
             case .failure(let error):
                 print(error)

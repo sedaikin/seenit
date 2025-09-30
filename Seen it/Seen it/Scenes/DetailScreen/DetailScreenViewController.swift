@@ -36,13 +36,12 @@ final class DetailScreenViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        detailScreenView.delegate = self
         
         setupBinding()
         setupUI()
         setupCustomBackButton()
         viewModel.loadData()
-        detailScreenView.delegate = self
-        view.backgroundColor = .background
     }
 }
 
@@ -93,6 +92,7 @@ private extension DetailScreenViewController {
     func setupUI () {
         setupScrollView()
         setupDetailScreenView()
+        view.backgroundColor = .background
     }
     
     func setupCustomBackButton() {
