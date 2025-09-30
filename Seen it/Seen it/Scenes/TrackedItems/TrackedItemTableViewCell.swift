@@ -20,7 +20,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
     private let image = RemoteImageView()
     private let buttonTracked = UIButton(frame: CGRect(x: 0, y: 0, width: 32, height: 32))
     
-    var trackedItem: SingleTrackedItem?
+    var trackedItem: DetailScreenModel?
     
     weak var delegate: TrackedItemDelegate?
     var indexPath: IndexPath?
@@ -44,7 +44,7 @@ final class TrackedItemTableViewCell: UITableViewCell {
     
     // MARK: - Public
     
-    func configure(with trackedItem: SingleTrackedItem) {
+    func configure(with trackedItem: DetailScreenModel) {
         self.trackedItem = trackedItem
         
         guard let url = URL(string: trackedItem.image) else {

@@ -60,8 +60,8 @@ final class NetworkManager {
         dataTask.resume()
     }
     
-    func loadDataForIds(_ ids: [Int], completion: @escaping ([SingleTrackedItem]) -> Void) {
-       var loadedItems: [SingleTrackedItem] = []
+    func loadDataForIds(_ ids: [Int], completion: @escaping ([DetailScreenModel]) -> Void) {
+       var loadedItems: [DetailScreenModel] = []
        let group = DispatchGroup()
        
        for id in ids {
@@ -86,7 +86,7 @@ final class NetworkManager {
        }
    }
     
-    func loadSingleData(id: Int, completion: @escaping (Result<SingleTrackedItem, Error>) -> Void) {
+    func loadSingleData(id: Int, completion: @escaping (Result<DetailScreenModel, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/\(id)") else {
             return
         }
@@ -108,7 +108,7 @@ final class NetworkManager {
             
             let decoder = JSONDecoder()
             do {
-                let trackedItem = try decoder.decode(SingleTrackedItem.self, from: data)
+                let trackedItem = try decoder.decode(DetailScreenModel.self, from: data)
                 completion(.success(trackedItem))
             } catch {
                 print(error)

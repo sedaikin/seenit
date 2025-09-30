@@ -15,7 +15,7 @@ final class TrackedItemsController: UIViewController {
     private let defaults = UserDefaultsKeys()
     private lazy var filmsCount = defaults.getMovieIds(for: .watched).count
     
-    private var trackedItems: [SingleTrackedItem] = []
+    private var trackedItems: [DetailScreenModel] = []
     private lazy var addedItems = defaults.getMovieIds(for: .tracked)
     
     // MARK: - Life cycle
@@ -118,7 +118,7 @@ extension TrackedItemsController {
         tableView.deselectRow(at: indexPath, animated: true)
 
         let singleItem = trackedItems[indexPath.row]
-        let singleItemController = SingleItemController(id: singleItem.id)
+        let singleItemController = DetailScreenViewController(id: singleItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
     }

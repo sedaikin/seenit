@@ -1,11 +1,11 @@
 //
-//  SingleTrackedItem.swift
+//  DetailScreenModel.swift
 //  Seen it
 //
 //  Created by Sedaykin Aleksey on 02.09.2025.
 //
 
-struct SingleTrackedItem: Decodable {
+struct DetailScreenModel: Decodable {
     let id: Int
     let name: String
     let image: String
