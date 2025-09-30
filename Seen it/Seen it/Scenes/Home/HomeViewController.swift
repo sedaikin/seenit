@@ -224,7 +224,7 @@ extension HomeViewController: UICollectionViewDelegate {
             return
         }
 
-        let singleItemController = SingleItemController(id: singleItem.id)
+        let singleItemController = DetailScreenViewController(id: singleItem.id)
         navigationController?.pushViewController(singleItemController, animated: true)
     }
 }

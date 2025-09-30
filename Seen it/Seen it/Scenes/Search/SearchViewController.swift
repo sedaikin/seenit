@@ -289,7 +289,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
     }
 
     private func navigateToFilmDetails(with id: Int) {
-        let singleItemController = SingleItemController(id: id)
+        let singleItemController = DetailScreenViewController(id: id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
     }
