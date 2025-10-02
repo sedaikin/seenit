@@ -29,6 +29,13 @@ final class HomeViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Prepare for reuse
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        image.prepareForReuse()
+    }
 }
 
 private extension HomeViewCell {
