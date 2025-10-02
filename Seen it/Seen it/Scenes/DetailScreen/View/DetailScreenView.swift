@@ -77,17 +77,13 @@ final class DetailScreenView: UIView {
     
     private let year: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: 16)
-        label.textColor = .systemGray2
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.configBigText(.systemGray2)
         return label
     }()
     
     private let duration: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: 16)
-        label.textColor = .systemGray2
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.configBigText(.systemGray2)
         return label
     }()
     
@@ -211,7 +207,7 @@ final class DetailScreenView: UIView {
             
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
             year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            year.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.7),
             
             duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
             duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
@@ -239,7 +235,7 @@ final class DetailScreenView: UIView {
             
             ratingKp.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
             ratingKp.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            ratingKp.trailingAnchor.constraint(equalTo: ratingImdb.leadingAnchor, constant: 0),
+            ratingKp.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.7),
             
             ratingImdb.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
             ratingImdb.leadingAnchor.constraint(equalTo: ratingKp.trailingAnchor, constant: 0),

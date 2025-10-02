@@ -1,11 +1,11 @@
 //
-//  TrackedItem.swift
+//  TrackedItemModel.swift
 //  Seen it
 //
 //  Created by Sedaykin Aleksey on 19.08.2025.
 //
 
-struct TrackedItem: Decodable {
+struct TrackedItemModel: Decodable {
     let items: [FilmItem]
 }
 

@@ -138,7 +138,7 @@ private extension DetailScreenViewController {
     func setupBinding() {
         viewModel.$detailInfo
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] product in
+            .sink { [weak self] _ in
                 guard let viewModel = self?.viewModel else {
                     return
                 }
