@@ -34,7 +34,6 @@ final class DetailScreenViewController: UIViewController {
     
     override func loadView() {
         view = detailScreenView
-        
     }
 
     override func viewDidLoad() {

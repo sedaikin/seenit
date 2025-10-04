@@ -12,7 +12,7 @@ struct TrackedItemModel: Decodable {
 struct FilmItem: Decodable, Hashable {
     let id: Int
     let name: String
-    let year: Int
+    let year: Int?
     let duration: Int?
     let image: String
     
