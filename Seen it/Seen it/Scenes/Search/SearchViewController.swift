@@ -20,6 +20,7 @@ final class SearchViewController: UIViewController {
     private var films: [FilmItem] = []
     private var searchResults: [Film] = []
     private var isSearching: Bool = false
+    private let userDefaultsKeys = UserDefaultsKeys()
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -27,6 +28,11 @@ final class SearchViewController: UIViewController {
         setupAppearance()
         setupUIComponents()
         loadPopularFilms()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        restoreSearchState()
     }
 }
 
@@ -83,7 +89,7 @@ private extension SearchViewController {
         layout.itemSize = CGSize(width: 120, height: 250)
         layout.minimumLineSpacing = 15
         layout.minimumInteritemSpacing = 15
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -140,6 +146,33 @@ private extension SearchViewController {
         ])
     }
 
+    func saveSearchState() {
+        guard isSearching && !searchResults.isEmpty else { return }
+
+        if let currentQuery = searchController.searchBar.text, !currentQuery.isEmpty {
+            userDefaultsKeys.saveLastSearchQuery(currentQuery)
+
+            let filmIds = searchResults.map { $0.filmId }
+            userDefaultsKeys.saveLastSearchResults(filmIds: filmIds)
+        }
+    }
+
+    func restoreSearchState() {
+        guard let lastQuery = userDefaultsKeys.getLastSearchQuery(), !lastQuery.isEmpty else {
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            guard let self = self else { return }
+            self.searchController.searchBar.text = lastQuery
+            self.searchController.isActive = true
+            self.isSearching = true
+
+            let savedFilmIds = self.userDefaultsKeys.getLastSearchResults()
+            self.performSearch(with: lastQuery)
+            self.userDefaultsKeys.clearLastSearch()
+        }
+    }
 }
 
 // MARK: - Data Loading
@@ -281,11 +314,10 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
         collectionView.deselectItem(at: indexPath, animated: true)
 
         let filmItem = films[indexPath.row]
-        navigateToFilmDetails(with: filmItem.id)
-
         if searchController.isActive {
-            searchController.isActive = false
+            saveSearchState()
         }
+        navigateToFilmDetails(with: filmItem.id)
     }
 
     private func navigateToFilmDetails(with id: Int) {
@@ -317,8 +349,8 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let film = searchResults[indexPath.row]
+        saveSearchState()
         navigateToFilmDetails(with: film.filmId)
-        searchController.isActive = false
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -356,9 +388,13 @@ extension SearchViewController: UISearchControllerDelegate {
     }
 
     func willDismissSearchController(_ searchController: UISearchController) {
-        hideSearchResults()
-        isSearching = false
-        searchResults.removeAll()
-        emptyStateView.isHidden = true
+        let hasSavedSearch = userDefaultsKeys.getLastSearchQuery() != nil
+
+        if !hasSavedSearch {
+            hideSearchResults()
+            isSearching = false
+            searchResults.removeAll()
+            emptyStateView.isHidden = true
+        }
     }
 }

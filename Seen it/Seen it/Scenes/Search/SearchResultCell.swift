@@ -105,16 +105,26 @@ final class SearchResultCell: UITableViewCell {
 
     // MARK: - Configuration
     func configure(with film: Film) {
-        let filmName = film.nameRu ?? film.nameEn ?? "Неизвестное название"
+        // ✅ Правильно обрабатываем названия
+        let russianName = film.nameRu
         let englishName = film.nameEn
         let year = film.year ?? "год не указан"
 
-        titleLabel.text = filmName
-
-        if let englishName = englishName, !englishName.isEmpty {
-            englishTitleLabel.text = englishName
-            yearLabel.text = "• \(year)"
+        if let russianName = russianName, !russianName.isEmpty {
+            titleLabel.text = russianName
+            if let englishName = englishName, !englishName.isEmpty, englishName != russianName {
+                englishTitleLabel.text = englishName
+                yearLabel.text = "• \(year)"
+            } else {
+                englishTitleLabel.text = year
+                yearLabel.text = nil
+            }
+        } else if let englishName = englishName, !englishName.isEmpty {
+            titleLabel.text = englishName
+            englishTitleLabel.text = year
+            yearLabel.text = nil
         } else {
+            titleLabel.text = "Неизвестное название"
             englishTitleLabel.text = year
             yearLabel.text = nil
         }

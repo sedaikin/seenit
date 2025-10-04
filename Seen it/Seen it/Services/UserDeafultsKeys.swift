@@ -12,7 +12,12 @@ struct UserDefaultsKeys {
         case tracked
         case watched
     }
-    
+
+    enum SearchKeys: String {
+        case lastSearchQuery
+        case lastSearchResults
+    }
+
     func addMovieId(_ movieId: Int, to list: ListType) {
         var movies = getMovieIds(for: list)
         if !movies.contains(movieId) {
@@ -37,5 +42,26 @@ struct UserDefaultsKeys {
     
     private func saveMovieIds(_ movieIds: [Int], for list: ListType) {
         UserDefaults.standard.set(movieIds, forKey: list.rawValue)
+    }
+
+    func saveLastSearchQuery(_ query: String) {
+        UserDefaults.standard.set(query, forKey: SearchKeys.lastSearchQuery.rawValue)
+    }
+    
+    func getLastSearchQuery() -> String? {
+        UserDefaults.standard.string(forKey: SearchKeys.lastSearchQuery.rawValue)
+    }
+    
+    func saveLastSearchResults(filmIds: [Int]) {
+        UserDefaults.standard.set(filmIds, forKey: SearchKeys.lastSearchResults.rawValue)
+    }
+    
+    func getLastSearchResults() -> [Int] {
+        UserDefaults.standard.array(forKey: SearchKeys.lastSearchResults.rawValue) as? [Int] ?? []
+    }
+    
+    func clearLastSearch() {
+        UserDefaults.standard.removeObject(forKey: SearchKeys.lastSearchQuery.rawValue)
+        UserDefaults.standard.removeObject(forKey: SearchKeys.lastSearchResults.rawValue)
     }
 }
