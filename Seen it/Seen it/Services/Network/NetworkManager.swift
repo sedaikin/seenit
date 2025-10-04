@@ -35,7 +35,7 @@ final class NetworkManager {
     
     private init() {}
     
-    func loadData(completion: @escaping (Result<TrackedItem, Error>) -> Void) {
+    func loadData(completion: @escaping (Result<TrackedItemModel, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=\(Calendar.current.component(.year, from: Date()))&month=JANUARY") else {
             return
         }
@@ -57,7 +57,7 @@ final class NetworkManager {
             
             let decoder = JSONDecoder()
             do {
-                let trackedItem = try decoder.decode(TrackedItem.self, from: data)
+                let trackedItem = try decoder.decode(TrackedItemModel.self, from: data)
                 completion(.success(trackedItem))
             } catch {
                 print(error)
@@ -125,7 +125,7 @@ final class NetworkManager {
         dataTask.resume()
     }
     
-    func loadCollection(type: String, page: Int, completion: @escaping (Result<TrackedItem, Error>) -> Void) {
+    func loadCollection(type: String, page: Int, completion: @escaping (Result<TrackedItemModel, Error>) -> Void) {
         guard let url = URL(string: "https://kinopoiskapiunofficial.tech/api/v2.2/films/collections?type=\(type)&page=\(page)") else {
             return
         }
@@ -147,7 +147,7 @@ final class NetworkManager {
             
             let decoder = JSONDecoder()
             do {
-                let trackedItem = try decoder.decode(TrackedItem.self, from: data)
+                let trackedItem = try decoder.decode(TrackedItemModel.self, from: data)
                 completion(.success(trackedItem))
             } catch {
                 print(error)

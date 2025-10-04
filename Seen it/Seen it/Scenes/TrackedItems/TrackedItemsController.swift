@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class TrackedItemsController: UIViewController {
 
@@ -13,10 +14,9 @@ final class TrackedItemsController: UIViewController {
     
     private let tableView = UITableView()
     private let defaults = UserDefaultsKeys()
-    private lazy var filmsCount = defaults.getMovieIds(for: .watched).count
-    
-    private var trackedItems: [DetailScreenModel] = []
-    private lazy var addedItems = defaults.getMovieIds(for: .tracked)
+    private lazy var filmIds = defaults.getMovieIds(for: .tracked)
+    private lazy var viewModel = TrackedItemsViewModel(filmIds: filmIds)
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Life cycle
     
@@ -25,12 +25,13 @@ final class TrackedItemsController: UIViewController {
         setupTable()
         setupNavbar()
         setupNotifications()
-        loadInitialData()
+        setupBinding()
+        viewModel.loadInitialData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        refreshAllData()
+        viewModel.refreshAllData(defaults.getMovieIds(for: .tracked))
     }
 
     override func viewDidLayoutSubviews() {
@@ -61,15 +62,9 @@ final class TrackedItemsController: UIViewController {
     }
     
     private func setupNavbar() {
-        title = String(localized: "myList")
+        title = "";
+        navigationItem.title = NSLocalizedString("myList", comment: "")
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
-    }
-    
-    // MARK: - Actions
-    
-    func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath) {
-        let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
-        showAlert(title: "Отметить как " + (isWatched ? "непросмотренный" : "просмотренный?"), indexPath: indexPath)
     }
     
 }
@@ -90,12 +85,19 @@ extension TrackedItemsController: UITableViewDataSource {
 
 extension TrackedItemsController: TrackedItemDelegate {
     
+    // MARK: - Actions
+    
+    func didTapButtonInCell(_ cell: TrackedItemTableViewCell, at indexPath: IndexPath) {
+        let isWatched = defaults.containsMovieId(viewModel.films[indexPath.row].id, in: .watched)
+        showAlert(title: "Отметить как " + (isWatched ? "непросмотренный" : "просмотренный?"), indexPath: indexPath)
+    }
+    
 }
 
 extension TrackedItemsController {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        trackedItems.count
+        viewModel.films.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -105,7 +107,7 @@ extension TrackedItemsController {
         
         cell.delegate = self
         cell.indexPath = indexPath
-        cell.configure(with: trackedItems[indexPath.row])
+        cell.configure(with: viewModel.films[indexPath.row])
         
         let backgroundView = UIView()
         backgroundView.backgroundColor = .tabbar
@@ -117,7 +119,7 @@ extension TrackedItemsController {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        let singleItem = trackedItems[indexPath.row]
+        let singleItem = viewModel.films[indexPath.row]
         let singleItemController = DetailScreenViewController(id: singleItem.id)
         singleItemController.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(singleItemController, animated: true)
@@ -127,55 +129,24 @@ extension TrackedItemsController {
 private extension TrackedItemsController {
     
     func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(userDefaultsDidChange),
-            name: UserDefaults.didChangeNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(refreshWhenAppearing),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-    }
-    
-    func loadInitialData() {
-        NetworkManager.shared.loadDataForIds(addedItems) { [weak self] loadedItems in
-            DispatchQueue.main.async {
-                self?.trackedItems = loadedItems
-                self?.tableView.reloadData()
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .receive(on: RunLoop.main)
+            .sink{ [weak self] _ in
+                guard let items = self?.defaults.getMovieIds(for: .tracked) else {
+                    return
+                }
+                self?.viewModel.refreshAllData(items)
             }
-        }
-    }
-    
-    func refreshAllData() {
-        let newItemIds = defaults.getMovieIds(for: .tracked)
-        
-        guard !newItemIds.isEmpty else {
-            addedItems.removeAll()
-            tableView.reloadData()
-            return
-        }
-        
-        NetworkManager.shared.loadDataForIds(newItemIds) { [weak self] loadedItems in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.trackedItems = loadedItems
-                self.tableView.reloadData()
-            }
-        }
+            .store(in: &cancellables)
     }
     
     func showAlert(title: String, isAdd: Bool = true, indexPath: IndexPath) {
         let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
         let yesAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
             guard let self else { return }
-            let isWatched = defaults.containsMovieId(trackedItems[indexPath.row].id, in: .watched)
-            isWatched ? defaults.removeMovieId(trackedItems[indexPath.row].id, from: .watched) : defaults.addMovieId(trackedItems[indexPath.row].id, to: .watched)
+            let isWatched = defaults.containsMovieId(viewModel.films[indexPath.row].id, in: .watched)
+            isWatched ? defaults.removeMovieId(viewModel.films[indexPath.row].id, from: .watched) :
+                        defaults.addMovieId(viewModel.films[indexPath.row].id, to: .watched)
             tableView.reloadData()
         }
         alert.addAction(yesAction)
@@ -186,23 +157,14 @@ private extension TrackedItemsController {
 }
 
 private extension TrackedItemsController {
-    
-    // MARK: -Objc funcs
-    
-    @objc private func userDefaultsDidChange(_ notification: Notification) {
         
-       let newIds = defaults.getMovieIds(for: .tracked)
-       let currentIds = addedItems.map { $0 }
-       
-       if newIds != currentIds {
-       DispatchQueue.main.async {
-               self.refreshAllData()
-           }
-       }
-    }
-    
-    @objc private func refreshWhenAppearing() {
-        refreshAllData()
+    func setupBinding() {
+        viewModel.$films
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.tableView.reloadData()
+            }
+            .store(in: &cancellables)
     }
     
 }

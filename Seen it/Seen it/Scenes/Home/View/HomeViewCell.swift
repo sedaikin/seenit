@@ -13,10 +13,29 @@ final class HomeViewCell: UICollectionViewCell {
     
     // MARK: - Properties
     
-    private let name = UILabel()
-    private let year = UILabel()
-    private let duration = UILabel()
-    private let image = RemoteImageView()
+    private let name: UILabel = {
+        let label = UILabel()
+        label.configSmallText()
+        return label
+    }()
+    
+    private let year: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .light)
+        label.textColor = .systemGray4
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private let image: RemoteImageView = {
+        let image = RemoteImageView()
+        image.translatesAutoresizingMaskIntoConstraints = false
+        image.contentMode = .scaleAspectFill
+        image.layer.cornerRadius = 8
+        image.clipsToBounds = true
+        return image
+    }()
+    
     var trackedItem: FilmItem?
     
     // MARK: - Life cycle
@@ -29,6 +48,13 @@ final class HomeViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - Prepare for reuse
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        image.prepareForReuse()
+    }
 }
 
 private extension HomeViewCell {
@@ -38,45 +64,21 @@ private extension HomeViewCell {
     func setupUI() {
         contentView.layer.masksToBounds = true
         
-        contentView.addSubviews(image, name, year, duration)
-        setupLabel()
-        setupItemImage()
-        setupItemYear()
+        contentView.addSubviews(image, name, year)
+        setupLayout()
     }
     
-    func setupItemImage() {
-        image.translatesAutoresizingMaskIntoConstraints = false
-        image.contentMode = .scaleAspectFill
-        
+    func setupLayout() {
         NSLayoutConstraint.activate([
             image.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             image.topAnchor.constraint(equalTo: contentView.topAnchor),
             image.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            image.heightAnchor.constraint(equalToConstant: 180)
-        ])
-    }
-    
-    func setupLabel() {
-        name.textAlignment = .left
-        name.textColor = .white
-        name.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        
-        name.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
+            image.heightAnchor.constraint(equalToConstant: 180),
+            
             name.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             name.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 16)
-        ])
-    }
-    
-    func setupItemYear() {
-        year.font = .systemFont(ofSize: 12, weight: .light)
-        year.textColor = .systemGray4
-        
-        year.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
+            name.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 16),
+            
             year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             year.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 8),
@@ -94,9 +96,13 @@ extension HomeViewCell {
         guard let url = URL(string: trackedItem.image) else {
             return
         }
+        
+        guard let fullYear = trackedItem.year else {
+            return
+        }
    
         name.text = trackedItem.name
-        year.text = String(trackedItem.year)
+        year.text = String(fullYear)
         image.setImage(url: url)
         
         setNeedsLayout()

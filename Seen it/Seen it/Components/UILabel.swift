@@ -8,6 +8,13 @@
 import UIKit
 
 extension UILabel {
+    func configBigText(_ color: UIColor) {
+        font = .systemFont(ofSize: 16, weight: .bold)
+        textColor = color
+        numberOfLines = 0
+        translatesAutoresizingMaskIntoConstraints = false
+    }
+    
     func configSmallText(_ with: String = "") {
         text = String(localized: "\(with)")
         textColor = .systemGray3
