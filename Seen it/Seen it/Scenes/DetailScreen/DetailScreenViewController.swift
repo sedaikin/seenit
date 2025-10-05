@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DetailScreenViewController: UIViewController {
+final class DetailScreenViewController: BaseViewController {
     
     // MARK: - Properties
 

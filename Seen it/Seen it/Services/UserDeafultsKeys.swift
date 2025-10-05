@@ -18,6 +18,12 @@ struct UserDefaultsKeys {
         case lastSearchResults
     }
 
+    enum ProfileKeys: String {
+        case firstName
+        case lastName
+        case email
+    }
+
     func addMovieId(_ movieId: Int, to list: ListType) {
         var movies = getMovieIds(for: list)
         if !movies.contains(movieId) {
@@ -63,5 +69,20 @@ struct UserDefaultsKeys {
     func clearLastSearch() {
         UserDefaults.standard.removeObject(forKey: SearchKeys.lastSearchQuery.rawValue)
         UserDefaults.standard.removeObject(forKey: SearchKeys.lastSearchResults.rawValue)
+    }
+
+    func saveUserProfile(firstName: String, lastName: String, email: String) {
+        UserDefaults.standard.set(firstName, forKey: ProfileKeys.firstName.rawValue)
+        UserDefaults.standard.set(lastName, forKey: ProfileKeys.lastName.rawValue)
+        UserDefaults.standard.set(email, forKey: ProfileKeys.email.rawValue)
+    }
+
+    func getUserProfile() -> (firstName: String, lastName: String, email: String)? {
+        guard let firstName = UserDefaults.standard.string(forKey: ProfileKeys.firstName.rawValue),
+              let lastName = UserDefaults.standard.string(forKey: ProfileKeys.lastName.rawValue),
+              let email = UserDefaults.standard.string(forKey: ProfileKeys.email.rawValue) else {
+            return nil
+        }
+        return (firstName, lastName, email)
     }
 }
