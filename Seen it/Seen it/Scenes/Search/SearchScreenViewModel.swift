@@ -11,7 +11,7 @@ import Combine
 final class SearchScreenViewModel: ObservableObject {
 
     // MARK: - Published Properties
-    @Published var searchState: SearchScreenModel = SearchScreenModel()
+    @Published var searchState =  SearchScreenModel()
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
@@ -73,7 +73,7 @@ final class SearchScreenViewModel: ObservableObject {
     }
 
     func restoreSearchState() -> String? {
-        return userDefaultsKeys.getLastSearchQuery()
+        userDefaultsKeys.getLastSearchQuery()
     }
 
     func clearSearchState() {

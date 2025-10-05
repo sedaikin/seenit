@@ -109,7 +109,7 @@ final class SearchResultCell: UITableViewCell {
         let englishName = film.nameEn
         let year = film.year ?? "год не указан"
 
-        if let russianName = russianName, !russianName.isEmpty {
+        if let russianName, !russianName.isEmpty {
             titleLabel.text = russianName
             if let englishName = englishName, !englishName.isEmpty, englishName != russianName {
                 englishTitleLabel.text = englishName
@@ -118,7 +118,7 @@ final class SearchResultCell: UITableViewCell {
                 englishTitleLabel.text = year
                 yearLabel.text = nil
             }
-        } else if let englishName = englishName, !englishName.isEmpty {
+        } else if let englishName, !englishName.isEmpty {
             titleLabel.text = englishName
             englishTitleLabel.text = year
             yearLabel.text = nil
