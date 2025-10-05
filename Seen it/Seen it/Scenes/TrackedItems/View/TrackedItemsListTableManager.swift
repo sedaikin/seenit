@@ -53,6 +53,24 @@ final class TrackedItemsListTableManager: UIView, UITableViewDataSource {
         addSubview(tableView)
     }
     
+    func setEmptyMessage(_ message: String) {
+        let messageLabel = UILabel(frame: CGRect(x: 0, y: 0, width: self.bounds.size.width, height: self.bounds.size.height))
+        messageLabel.text = message
+        messageLabel.numberOfLines = 0
+        messageLabel.textColor = .white
+        messageLabel.textAlignment = .center
+        messageLabel.font = .boldSystemFont(ofSize: 15)
+        messageLabel.sizeToFit()
+
+        tableView.backgroundView = messageLabel
+        tableView.separatorStyle = .none
+    }
+
+    func restore() {
+        tableView.backgroundView = nil
+        tableView.separatorStyle = .singleLine
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
@@ -85,7 +103,13 @@ extension TrackedItemsListTableManager: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        films.count
+        if films.count == 0 {
+            setEmptyMessage(NSLocalizedString("emptyState", comment: ""))
+        } else {
+            restore()
+        }
+        
+        return films.count
     }
     
 }

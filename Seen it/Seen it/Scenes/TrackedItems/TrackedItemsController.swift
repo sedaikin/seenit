@@ -28,11 +28,6 @@ final class TrackedItemsController: UIViewController {
         setupBinding()
         viewModel.loadInitialData()
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        viewModel.refreshAllData(defaults.getMovieIds(for: .tracked))
-    }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -53,7 +48,18 @@ final class TrackedItemsController: UIViewController {
     private func setupNavbar() {
         title = "";
         navigationItem.title = NSLocalizedString("myList", comment: "")
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .background
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        
+        let scrolledAppearance = UINavigationBarAppearance()
+        scrolledAppearance.configureWithOpaqueBackground()
+        scrolledAppearance.backgroundColor = .background
+        scrolledAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = scrolledAppearance
     }
     
 }

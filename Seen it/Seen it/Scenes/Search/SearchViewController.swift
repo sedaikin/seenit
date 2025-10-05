@@ -61,6 +61,7 @@ private extension SearchViewController {
         searchController.searchBar.backgroundColor = UIColor(named: "background")
         searchController.searchBar.searchTextField.backgroundColor = UIColor(named: "tabbar")
         searchController.searchBar.searchTextField.textColor = .white
+        searchController.searchBar.searchTextField.leftView?.tintColor = .active
 
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
