@@ -18,6 +18,19 @@ final class DetailScreenView: UIView {
     
     weak var delegate: DetailScreenDelegate?
     
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView ()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
+    }()
+    
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let poster: RemoteImageView = {
         let imageView = RemoteImageView(frame: .zero)
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -64,17 +77,13 @@ final class DetailScreenView: UIView {
     
     private let year: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: 16)
-        label.textColor = .systemGray2
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.configBigText(.systemGray2)
         return label
     }()
     
     private let duration: UILabel = {
         let label = UILabel()
-        label.font = .boldSystemFont(ofSize: 16)
-        label.textColor = .systemGray2
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.configBigText(.systemGray2)
         return label
     }()
     
@@ -124,7 +133,6 @@ final class DetailScreenView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        translatesAutoresizingMaskIntoConstraints = false
         setupUI()
         setupLayout()
     }
@@ -136,7 +144,9 @@ final class DetailScreenView: UIView {
     // MARK: - Setup UI
     
     func setupUI() {
-        self.addSubviews(
+        addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubviews(
             poster,
             name,
             buttonTracked,
@@ -156,14 +166,31 @@ final class DetailScreenView: UIView {
     // MARK: - Setup layout
     
     func setupLayout() {
+        let contentViewHeightAnchor = contentView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
         NSLayoutConstraint.activate([
-            poster.topAnchor.constraint(equalTo: topAnchor),
-            poster.leadingAnchor.constraint(equalTo: leadingAnchor),
-            poster.trailingAnchor.constraint(equalTo: trailingAnchor),
-            poster.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 0.75),
+            leadingAnchor.constraint(equalTo: leadingAnchor),
+            trailingAnchor.constraint(equalTo: trailingAnchor),
+            topAnchor.constraint(equalTo: topAnchor),
+            bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
+            poster.topAnchor.constraint(equalTo: contentView.topAnchor),
+            poster.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            poster.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            poster.heightAnchor.constraint(equalTo: contentView.widthAnchor, multiplier: 0.75),
             
             name.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
-            name.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            name.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             name.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor),
             
             buttonTracked.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
@@ -174,46 +201,49 @@ final class DetailScreenView: UIView {
             
             buttonAdded.topAnchor.constraint(equalTo: poster.bottomAnchor, constant: 16),
             buttonAdded.leadingAnchor.constraint(equalTo: buttonTracked.trailingAnchor, constant: 0),
-            buttonAdded.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            buttonAdded.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             buttonAdded.widthAnchor.constraint(equalToConstant: 26),
             buttonAdded.heightAnchor.constraint(equalToConstant: 32),
             
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
-            year.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            year.trailingAnchor.constraint(equalTo: duration.leadingAnchor, constant: 0),
+            year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            year.widthAnchor.constraint(equalToConstant: 44),
             
             duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
             duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
             duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),
             
             genresTitle.topAnchor.constraint(equalTo: year.bottomAnchor, constant: 28),
-            genresTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            genresTitle.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            genresTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            genresTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             genres.topAnchor.constraint(equalTo: genresTitle.bottomAnchor, constant: 6),
-            genres.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            genres.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            genres.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            genres.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             titleDescription.topAnchor.constraint(equalTo: genres.bottomAnchor, constant: 28),
-            titleDescription.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            titleDescription.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            titleDescription.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            titleDescription.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             textDescription.topAnchor.constraint(equalTo: titleDescription.bottomAnchor, constant: 6),
-            textDescription.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            textDescription.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            textDescription.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            textDescription.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             ratingsTitle.topAnchor.constraint(equalTo: textDescription.bottomAnchor, constant: 28),
-            ratingsTitle.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            ratingsTitle.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            ratingsTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            ratingsTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
             ratingKp.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
-            ratingKp.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
-            ratingKp.trailingAnchor.constraint(equalTo: ratingImdb.leadingAnchor, constant: 0),
+            ratingKp.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            ratingKp.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.7),
             
             ratingImdb.topAnchor.constraint(equalTo: ratingsTitle.bottomAnchor, constant: 6),
             ratingImdb.leadingAnchor.constraint(equalTo: ratingKp.trailingAnchor, constant: 0),
-            ratingImdb.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            ratingImdb.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
         ])
+        
+        contentViewHeightAnchor.priority = .defaultLow
+        contentViewHeightAnchor.isActive = true
     }
     
     // MARK: - Update UI funcs

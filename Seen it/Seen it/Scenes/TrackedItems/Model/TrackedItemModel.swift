@@ -1,18 +1,18 @@
 //
-//  TrackedItem.swift
+//  TrackedItemModel.swift
 //  Seen it
 //
 //  Created by Sedaykin Aleksey on 19.08.2025.
 //
 
-struct TrackedItem: Decodable {
+struct TrackedItemModel: Decodable {
     let items: [FilmItem]
 }
 
 struct FilmItem: Decodable, Hashable {
     let id: Int
     let name: String
-    let year: Int
+    let year: Int?
     let duration: Int?
     let image: String
     
