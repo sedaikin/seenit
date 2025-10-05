@@ -207,7 +207,7 @@ final class DetailScreenView: UIView {
             
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
             year.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            year.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.7),
+            year.widthAnchor.constraint(equalToConstant: 44),
             
             duration.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 4),
             duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
