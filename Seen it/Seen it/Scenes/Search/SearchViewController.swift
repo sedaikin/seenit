@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class SearchViewController: UIViewController {
 
@@ -16,17 +17,22 @@ final class SearchViewController: UIViewController {
     private let searchResultsTableView = UITableView()
     private let emptyStateView = EmptyStateView()
 
-    // MARK: - Data Properties
-    private var films: [FilmItem] = []
-    private var searchResults: [Film] = []
-    private var isSearching: Bool = false
+    // MARK: - Combine
+    private let viewModel = SearchScreenViewModel()
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupAppearance()
         setupUIComponents()
-        loadPopularFilms()
+        bindViewModel()
+        viewModel.loadPopularFilms()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        restoreSearchState()
     }
 }
 
@@ -83,7 +89,7 @@ private extension SearchViewController {
         layout.itemSize = CGSize(width: 120, height: 250)
         layout.minimumLineSpacing = 15
         layout.minimumInteritemSpacing = 15
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0)
 
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -140,56 +146,79 @@ private extension SearchViewController {
         ])
     }
 
-}
+    func bindViewModel() {
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.handleLoadingState(isLoading)
+            }
+            .store(in: &cancellables)
 
-// MARK: - Data Loading
-private extension SearchViewController {
+        viewModel.$searchState
+            .map { $0.films }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] films in
+                self?.filmsCollectionView?.reloadData()
+            }
+            .store(in: &cancellables)
 
-    func loadPopularFilms() {
-        NetworkManager.shared.loadCollection(type: filmsCollection.topAll.type, page: 1) { [weak self] result in
-            switch result {
-            case .success(let item):
-                DispatchQueue.main.async {
-                    self?.films.append(contentsOf: item.items)
-                    self?.filmsCollectionView?.reloadData()
+        viewModel.$searchState
+            .map { $0.searchResults }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] searchResults in
+                self?.searchResultsTableView.reloadData()
+                self?.updateEmptyState()
+            }
+            .store(in: &cancellables)
+
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let errorMessage = errorMessage {
+                    self?.showErrorState(message: errorMessage)
                 }
-            case .failure(let error):
-                print("Error loading popular films: \(error)")
             }
-        }
+            .store(in: &cancellables)
+
+        viewModel.$searchState
+            .map { $0.isSearching }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isSearching in
+                self?.handleSearchingState(isSearching)
+            }
+            .store(in: &cancellables)
     }
 
-    func performSearch(with searchText: String) {
-        NetworkManager.shared.loadFilmsByKeyword(keyword: searchText, page: 1) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.handleSearchResult(result, for: searchText)
-            }
+    func restoreSearchState() {
+        guard let lastQuery = viewModel.restoreSearchState(), !lastQuery.isEmpty else {
+            return
         }
-    }
 
-    func handleSearchResult(_ result: Result<KeyboardResponse, Error>, for query: String) {
-        switch result {
-        case .success(let response):
-            searchResults = response.films
-            searchResultsTableView.reloadData()
-
-            if response.films.isEmpty {
-                showNoResultsState(for: query)
-            } else {
-                updateEmptyState()
-            }
-
-        case .failure(let error):
-            print("Search error: \(error)")
-            searchResults.removeAll()
-            searchResultsTableView.reloadData()
-            showErrorState(error: error)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            guard let self = self else { return }
+            self.searchController.searchBar.text = lastQuery
+            self.searchController.isActive = true
+            self.viewModel.setSearching(true)
+            self.viewModel.performSearch(query: lastQuery)
+            self.viewModel.clearSearchState()
         }
     }
 }
 
 // MARK: - UI State Management
 private extension SearchViewController {
+
+    func handleLoadingState(_ isLoading: Bool) {
+        updateEmptyState()
+    }
+
+    func handleSearchingState(_ isSearching: Bool) {
+        if isSearching {
+            showSearchResults()
+        } else {
+            hideSearchResults()
+        }
+    }
 
     func showSearchResults() {
         UIView.animate(withDuration: 0.3) {
@@ -213,47 +242,40 @@ private extension SearchViewController {
     }
 
     func updateEmptyState() {
-        let isEmpty = isSearching && searchResults.isEmpty
+        let searchState = viewModel.searchState
+        let shouldShowEmptyState: Bool
+
+        if viewModel.isLoading {
+            shouldShowEmptyState = viewModel.searchState.searchResults.isEmpty
+            if shouldShowEmptyState && !searchState.searchQuery.isEmpty {
+                emptyStateView.configure(with: .loading(query: searchState.searchQuery))
+            }
+        } else {
+            shouldShowEmptyState = searchState.isSearching && searchState.searchResults.isEmpty
+            if shouldShowEmptyState {
+                if searchState.searchQuery.isEmpty {
+                    emptyStateView.configure(with: .initialSearch)
+                } else {
+                    emptyStateView.configure(with: .noResults(query: searchState.searchQuery))
+                }
+            }
+        }
+
         UIView.animate(withDuration: 0.3) {
-            self.emptyStateView.alpha = isEmpty ? 1 : 0
-            self.emptyStateView.isHidden = !isEmpty
+            self.emptyStateView.alpha = shouldShowEmptyState ? 1 : 0
+            self.emptyStateView.isHidden = !shouldShowEmptyState
         }
     }
 
-    func showInitialSearchState() {
-        emptyStateView.configure(with: .initialSearch)
-        updateEmptyState()
-    }
-
-    func showLoadingState(for query: String) {
-        emptyStateView.configure(with: .loading(query: query))
-        updateEmptyState()
-    }
-
-    func showNoResultsState(for query: String) {
-        emptyStateView.configure(with: .noResults(query: query))
-        updateEmptyState()
-    }
-
-    func showErrorState(error: Error) {
+    func showErrorState(message: String) {
+        struct DisplayError: Error {
+            let message: String
+        }
+        let error = DisplayError(message: message)
         emptyStateView.configure(with: .error(error))
-        updateEmptyState()
-    }
-
-    func errorMessage(for error: Error) -> String {
-        guard let networkError = error as? NetworkError else {
-            return "Произошла ошибка при поиске"
-        }
-
-        switch networkError {
-        case .serverError(let statusCode):
-            return "Ошибка сервера (\(statusCode))"
-        case .noData:
-            return "Нет данных от сервера"
-        case .invalidURL:
-            return "Неверный URL запроса"
-        case .decodingError:
-            return "Ошибка обработки данных"
+        UIView.animate(withDuration: 0.3) {
+            self.emptyStateView.alpha = 1
+            self.emptyStateView.isHidden = false
         }
     }
 }
@@ -262,7 +284,7 @@ private extension SearchViewController {
 extension SearchViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return isSearching ? searchResults.count : films.count
+        return viewModel.searchState.films.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -273,19 +295,22 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
             return UICollectionViewCell()
         }
 
-        cell.configure(with: films[indexPath.item])
+        let filmItem = viewModel.searchState.films[indexPath.item]
+        cell.configure(with: filmItem)
         return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
 
-        let filmItem = films[indexPath.row]
-        navigateToFilmDetails(with: filmItem.id)
-
+        let filmItem = viewModel.searchState.films[indexPath.row]
         if searchController.isActive {
-            searchController.isActive = false
+            viewModel.saveSearchState(
+                query: viewModel.searchState.searchQuery,
+                results: viewModel.searchState.searchResults
+            )
         }
+        navigateToFilmDetails(with: filmItem.id)
     }
 
     private func navigateToFilmDetails(with id: Int) {
@@ -299,7 +324,7 @@ extension SearchViewController: UICollectionViewDataSource, UICollectionViewDele
 extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        searchResults.count
+        viewModel.searchState.searchResults.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -310,15 +335,18 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()
         }
 
-        let film = searchResults[indexPath.row]
+        let film = viewModel.searchState.searchResults[indexPath.row]
         cell.configure(with: film)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let film = searchResults[indexPath.row]
+        let film = viewModel.searchState.searchResults[indexPath.row]
+        viewModel.saveSearchState(
+            query: viewModel.searchState.searchQuery,
+            results: viewModel.searchState.searchResults
+        )
         navigateToFilmDetails(with: film.filmId)
-        searchController.isActive = false
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -330,20 +358,22 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 extension SearchViewController: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
-        guard let searchText = searchController.searchBar.text, !searchText.isEmpty else {
-            searchResults.removeAll()
+        guard let searchText = searchController.searchBar.text else { return }
+
+        if searchText.isEmpty {
+            viewModel.clearSearch()
             searchResultsTableView.reloadData()
-            showInitialSearchState()
+            updateEmptyState()
             return
         }
 
         NSObject.cancelPreviousPerformRequests(withTarget: self)
         perform(#selector(executeSearch(_:)), with: searchText, afterDelay: 1)
-        showLoadingState(for: searchText)
+        updateEmptyState()
     }
 
     @objc private func executeSearch(_ searchText: String) {
-        performSearch(with: searchText)
+        viewModel.performSearch(query: searchText)
     }
 }
 
@@ -352,13 +382,17 @@ extension SearchViewController: UISearchControllerDelegate {
 
     func willPresentSearchController(_ searchController: UISearchController) {
         showSearchResults()
-        isSearching = true
+        viewModel.setSearching(true)
     }
 
     func willDismissSearchController(_ searchController: UISearchController) {
-        hideSearchResults()
-        isSearching = false
-        searchResults.removeAll()
-        emptyStateView.isHidden = true
+        let hasSavedSearch = viewModel.restoreSearchState() != nil
+
+        if !hasSavedSearch {
+            hideSearchResults()
+            viewModel.setSearching(false)
+            viewModel.clearSearch()
+            emptyStateView.isHidden = true
+        }
     }
 }
