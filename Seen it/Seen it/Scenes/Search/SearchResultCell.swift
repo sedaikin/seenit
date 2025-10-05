@@ -105,7 +105,6 @@ final class SearchResultCell: UITableViewCell {
 
     // MARK: - Configuration
     func configure(with film: Film) {
-        // ✅ Правильно обрабатываем названия
         let russianName = film.nameRu
         let englishName = film.nameEn
         let year = film.year ?? "год не указан"
