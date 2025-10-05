@@ -66,8 +66,8 @@ final class HomeViewCollection: UIView, UICollectionViewDelegate {
     }
     
     func createLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout { [weak self] sectionIndex, layoutEnvironment in
-            return self?.createSectionLayout()
+        UICollectionViewCompositionalLayout { [weak self] sectionIndex, layoutEnvironment in
+            self?.createSectionLayout()
         }
     }
     
