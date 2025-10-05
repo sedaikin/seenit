@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - Delegate for navigation and alert
 
-protocol NavigationDelegate: AnyObject {
+protocol NavigationDelegateTableManager: AnyObject {
     func navigateToNewScreen(to: UIViewController)
     func presentFor(alert: UIAlertController)
 }
@@ -18,7 +18,7 @@ final class TrackedItemsListTableManager: UIView, UITableViewDataSource {
     
     // MARK: - Properties
     
-    weak var delegate: NavigationDelegate?
+    weak var delegate: NavigationDelegateTableManager?
     var films: [DetailScreenModel] = []
     let tableView = UITableView()
     private let defaults = UserDefaultsKeys()

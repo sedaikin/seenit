@@ -97,7 +97,7 @@ private extension TrackedItemsController {
 
 // MARK: - Navigation delegate
 
-extension TrackedItemsController: NavigationDelegate {
+extension TrackedItemsController: NavigationDelegateTableManager {
 
     func navigateToNewScreen(to: UIViewController) {
         navigationController?.pushViewController(to, animated: true)
