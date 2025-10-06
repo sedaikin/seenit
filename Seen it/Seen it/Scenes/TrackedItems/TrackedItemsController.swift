@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class TrackedItemsController: UIViewController {
+final class TrackedItemsController: BaseViewController {
 
     // MARK: - Private properties
     

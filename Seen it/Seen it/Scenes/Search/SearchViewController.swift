@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class SearchViewController: UIViewController {
+final class SearchViewController: BaseViewController {
 
     // MARK: - UI Properties
     private let searchController = UISearchController(searchResultsController: nil)

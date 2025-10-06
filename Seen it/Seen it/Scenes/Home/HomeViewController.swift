@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
     
     // MARK: - Properties
     
