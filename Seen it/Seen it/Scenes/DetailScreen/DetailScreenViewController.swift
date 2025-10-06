@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DetailScreenViewController: UIViewController, UIGestureRecognizerDelegate {
+final class DetailScreenViewController: BaseViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
 
