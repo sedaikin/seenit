@@ -57,10 +57,13 @@ private extension SearchViewController {
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.delegate = self
 
-        searchController.searchBar.placeholder = "Поиск..."
         searchController.searchBar.backgroundColor = UIColor(named: "background")
         searchController.searchBar.searchTextField.backgroundColor = UIColor(named: "tabbar")
         searchController.searchBar.searchTextField.textColor = .white
+        searchController.searchBar.searchTextField.attributedPlaceholder = NSAttributedString(
+            string: "Поиск...",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.lightGray]
+        )
         searchController.searchBar.searchTextField.leftView?.tintColor = .active
 
         navigationItem.searchController = searchController
@@ -384,6 +387,11 @@ extension SearchViewController: UISearchControllerDelegate {
     func willPresentSearchController(_ searchController: UISearchController) {
         showSearchResults()
         viewModel.setSearching(true)
+        searchController.searchBar.searchTextField.textColor = .white
+    }
+
+    func didPresentSearchController(_ searchController: UISearchController) {
+        searchController.searchBar.searchTextField.textColor = .white
     }
 
     func willDismissSearchController(_ searchController: UISearchController) {

@@ -77,7 +77,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите имя", text: $viewModel.firstName)
+                TextField("", text: $viewModel.firstName, prompt: Text("Введите имя").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
@@ -89,7 +89,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите фамилию", text: $viewModel.lastName)
+                TextField("", text: $viewModel.lastName, prompt: Text("Введите фамилию").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
@@ -101,7 +101,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите email", text: $viewModel.userEmail)
+                TextField("", text: $viewModel.userEmail, prompt: Text("Введите e-mail").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
