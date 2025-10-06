@@ -11,6 +11,8 @@ struct SettingsScreenView: View {
 
     // MARK: - Properties
     @StateObject private var viewModel = SettingsScreenViewModel()
+    @State private var keyboardHeight: CGFloat = 0
+
     private var backgroundColor: Color {
         Color(UIColor(named: "background") ?? .systemGroupedBackground)
     }
@@ -23,19 +25,26 @@ struct SettingsScreenView: View {
 
     // MARK: - Body
     var body: some View {
-        VStack {
-            VStack(alignment: .leading, spacing: 20) {
-                profileSection
-                notificationsSection
-                aboutSection
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    profileSection
+                    notificationsSection
+                    aboutSection
+                }
+                .padding()
+                .padding(.bottom, keyboardHeight)
             }
-            .padding()
-
-            Spacer()
         }
         .background(backgroundColor.edgesIgnoringSafeArea(.all))
         .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            hideKeyboard()
+        }
+        .onAppear {
+            setupKeyboardObservers()
+        }
+        .onDisappear {
+            removeKeyboardObservers()
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
             Button("OK", role: .cancel) { }
@@ -68,7 +77,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите имя", text: $viewModel.firstName)
+                TextField("", text: $viewModel.firstName, prompt: Text("Введите имя").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
@@ -80,7 +89,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите фамилию", text: $viewModel.lastName)
+                TextField("", text: $viewModel.lastName, prompt: Text("Введите фамилию").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
@@ -92,7 +101,7 @@ private extension SettingsScreenView {
                     .foregroundColor(.white)
                     .font(.system(size: 14))
 
-                TextField("Введите email", text: $viewModel.userEmail)
+                TextField("", text: $viewModel.userEmail, prompt: Text("Введите e-mail").foregroundColor(.gray))
                     .foregroundColor(.white)
                     .padding()
                     .background(Color.gray.opacity(0.2))
@@ -189,6 +198,35 @@ private extension SettingsScreenView {
         .padding()
         .background(cardBackgroundColor)
         .cornerRadius(10)
+    }
+}
+
+// MARK: - Keyboard Handling
+private extension SettingsScreenView {
+
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    keyboardHeight = keyboardFrame.height
+                }
+            }
+        }
+
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation(.easeOut(duration: 0.25)) {
+                keyboardHeight = 0
+            }
+        }
+    }
+
+    func removeKeyboardObservers() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
     }
 }
 

@@ -104,7 +104,7 @@ private extension TrackedItemTableViewCell {
             year.leadingAnchor.constraint(equalTo: image.trailingAnchor, constant: 16),
             year.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 6),
             year.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -34),
-            year.widthAnchor.constraint(lessThanOrEqualTo: contentView.widthAnchor, multiplier: 0.7),
+            year.widthAnchor.constraint(equalToConstant: 33),
             
             duration.leadingAnchor.constraint(equalTo: year.trailingAnchor, constant: 0),
             duration.trailingAnchor.constraint(equalTo: buttonTracked.leadingAnchor, constant: 0),

@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DetailScreenViewController: BaseViewController {
+final class DetailScreenViewController: BaseViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
 
@@ -52,6 +52,19 @@ private extension DetailScreenViewController {
 
     func setupUI () {
         view.backgroundColor = .background
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .background
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        
+        let scrolledAppearance = UINavigationBarAppearance()
+        scrolledAppearance.configureWithOpaqueBackground()
+        scrolledAppearance.backgroundColor = .background
+        scrolledAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = scrolledAppearance
     }
     
     func setupCustomBackButton() {
