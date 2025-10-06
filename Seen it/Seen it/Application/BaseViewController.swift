@@ -5,7 +5,6 @@
 //  Created by Rogova Mariya on 05.10.2025.
 //
 
-import UIKit
 import SwiftUI
 
 class BaseViewController: UIViewController {
